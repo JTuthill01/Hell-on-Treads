@@ -1,6 +1,7 @@
 #pragma once
 #include <Entity/Player.hpp>
 #include <Entity/Enemies/Enemies.hpp>
+#include <Collision/Collision.hpp>
 
 class Level
 {
@@ -13,7 +14,8 @@ public:
 	virtual void initLevel() = 0;
 
 	void playerInput(const float& deltaTime);
-	bool collision(const float& deltaTime);
+
+	void collision(const float& deltaTime);
 	
 protected:
 	std::stack<Level*>* pLevel;
@@ -21,8 +23,10 @@ protected:
 	sf::RenderWindow* pWindow;
 
 	Player pPlayer;
+	std::vector<Player> player;
 
 	Enemies pEnemies;
+	std::vector<Enemies> enemy;
 
 	bool pLoadLevel;
 };

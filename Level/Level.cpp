@@ -1,7 +1,7 @@
 #include "stdafx.hpp"
 #include "Level.hpp"
 
-Level::Level(sf::RenderWindow * window, std::stack<Level*>* level) : pWindow(window), pLevel(level){}
+Level::Level(sf::RenderWindow * window, std::stack<Level*>* level) : pWindow(window), pLevel(level), pLoadLevel(false) {}
 
 Level::~Level() = default;
 
@@ -14,12 +14,10 @@ void Level::playerInput(const float & deltaTime)
 		this->pPlayer.move(-0.8F, 0.F, deltaTime);
 }
 
-bool Level::collision(const float& deltaTime)
+void Level::collision(const float& deltaTime)
 {
 	if (this->pPlayer.getGobalBounds().intersects(this->pEnemies.getGobalBounds()))
-		return true;
-
-	return false;
+		std::cout << "Collision" << "\n";
 }
 
 

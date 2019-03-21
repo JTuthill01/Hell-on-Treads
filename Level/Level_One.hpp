@@ -15,6 +15,8 @@ public:
 	virtual void render(sf::RenderTarget & target) override;
 	virtual void initLevel() override;
 
+	void collisions();
+
 private:
 	sf::Texture mLevelOneTexture;
 	sf::Sprite mLevelOneSprite;
