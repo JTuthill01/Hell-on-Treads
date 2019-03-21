@@ -9,16 +9,20 @@ Enemies::Enemies() : mShootTimer(mShootTimerMax), mShootTimerMax(50.F), mDropBom
 		std::cerr << "Failed to load the goddamn enemy, asshole" << "\n";
 
 	this->mEnemySprite.setTexture(this->mEnemyTexture);
-	this->mEnemySprite.setPosition(1800.F, 0.F);
+	
 	this->mEnemySprite.setScale(-1.5F, 1.5F);
 
-	this->mEnemyCenter.x = this->mEnemySprite.getPosition().x + this->mEnemySprite.getGlobalBounds().width / 2;
-	this->mEnemyCenter.y = this->mEnemySprite.getPosition().y + this->mEnemySprite.getGlobalBounds().height / 2;
+	this->mEnemySprite.setOrigin(this->mEnemySprite.getLocalBounds().width /2,
+		this->mEnemySprite.getLocalBounds().height /2);
+
+	this->mEnemySprite.setPosition(1800.F, 0.F);
 
 	this->pAudio.loadSound("Resources/Sounds/Explosions/explosion1.ogg");
 	this->pAudio.setVolume(10.F);
 
 	this->loadProjectile();
+
+	this->loadEnemyTanks();
 }
 
 Enemies::~Enemies() = default;
@@ -26,6 +30,8 @@ Enemies::~Enemies() = default;
 void Enemies::render(sf::RenderTarget& target)
 {
 	target.draw(this->mEnemySprite);
+
+	target.draw(this->mEnemyTankSprite);
 
 	for (size_t i = 0; i < this->mProjectiles.size(); i++)
 		this->mProjectiles[i].render(target);
@@ -35,10 +41,7 @@ void Enemies::update(const float& deltaTime)
 {
 	this->mEnemySprite.move(sf::Vector2f(-0.6F, 0.F));
 
-	this->checkPosition(deltaTime);
-
-	if (this->checkPosition(deltaTime))
-		this->bombDrop(deltaTime);
+	this->mEnemyTankSprite.move(sf::Vector2f(-0.6F, 0.F));
 
 	for (size_t i = 0; i < this->mProjectiles.size(); i++)
 		this->mProjectiles[i].update(deltaTime);
@@ -50,18 +53,15 @@ void Enemies::move(const float direction_x, const float direction_y, const float
 		this->pMovementComponent->move(direction_x, direction_y, deltaTime);
 }
 
-bool Enemies::checkPosition(const float& deltaTime)
+void Enemies::loadEnemyTanks()
 {
-	if (this->mEnemySprite.getPosition().y <= this->pPlayer.getPosition().y)
-	{
-		this->mDropBomb = true;
-		return true;
-	}
+	if (!this->mEnemyTankTexture.loadFromFile("Resources/Textures/Enemy/EnemyTank.png"))
+		std::cerr << "Fucking EnemyTank failed to fucking load" << "\n";
 
-	else
-		this->mDropBomb = false;
-
-	return false;
+	this->mEnemyTankSprite.setTexture(this->mEnemyTankTexture);
+	this->mEnemyTankSprite.setScale(-1.7F, 1.7F);
+	this->mEnemyTankSprite.setPosition(1800.F, 710.F);
+	this->mEnemyTankSprite.setColor(sf::Color::Blue);
 }
 
 void Enemies::bombDrop(const float& deltaTime)

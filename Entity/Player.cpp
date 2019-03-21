@@ -3,17 +3,19 @@
 
 std::vector<sf::Texture>Player::mPlayerProjectileTextures;
 
-Player::Player() : mIsAttacking(false), mKeyTimeMax(35.5F), mKeyTime(mKeyTimeMax), mIsContact(false), mShootTimerMax(35.F), mShootTimer(mShootTimerMax), mIsFiring(false)
+Player::Player()
 {
+	this->initVariables();
+
 	if (!this->mPlayerTexture.loadFromFile("Resources/Textures/Player/Combined.png"))
 		std::cerr << "Failed to load texture" << "\n";
 
 	this->mPlayerSprite.setTexture(this->mPlayerTexture);
-	this->mPlayerSprite.setPosition(0.f, 710.f);
 	this->mPlayerSprite.setScale(1.7F, 1.7F);
 
-	this->mPlayerCenter.x = this->mPlayerSprite.getPosition().x + this->mPlayerSprite.getGlobalBounds().width / 2;
-	this->mPlayerCenter.y = this->mPlayerSprite.getPosition().y + this->mPlayerSprite.getGlobalBounds().height / 2;
+	this->mPlayerSprite.setOrigin( this->mPlayerSprite.getLocalBounds().width / 2, this->mPlayerSprite.getLocalBounds().height / 2);
+
+	this->mPlayerSprite.setPosition(300.F, 710.F);
 
 	this->createMovementComponent(350.f, 16.f, 6.f);
 	this->createAnimationComponent(this->mPlayerTexture);
@@ -31,10 +33,7 @@ Player::Player() : mIsAttacking(false), mKeyTimeMax(35.5F), mKeyTime(mKeyTimeMax
 
 Player::~Player() = default;
 
-Projectile& Player::getProjectile(unsigned index)
-{
-	return this->mProjectile[index];
-}
+Projectile& Player::getProjectile(unsigned index) { return this->mProjectile[index]; }
 
 void Player::render(sf::RenderTarget & target) 
 {
@@ -42,6 +41,34 @@ void Player::render(sf::RenderTarget & target)
 
 	for (size_t i = 0; i < this->mProjectile.size(); i++)
 		this->mProjectile[i].render(target);
+
+	if(this->mIsMuzzleOn)
+		this->mProjectiles.render(target);
+}
+
+void Player::initVariables()
+{
+	this->pMovementComponent = nullptr;
+
+	this->pMovementComponent = nullptr;
+
+	this->mIsAttacking = false;
+
+	this->mKeyTimeMax = 55.5F;
+
+	this->mKeyTime = mKeyTimeMax;
+
+	this->mIsContact = false;
+
+	this->mShootTimerMax = 55.F;
+
+	this->mShootTimer = this->mShootTimerMax;
+
+	this->mIsMuzzleOn = false;
+
+	this->mMuzzleTimerMax = 1.5F;
+
+	this->mMuzzleTimer = this->mMuzzleTimerMax;
 }
 
 void Player::currentWeapon(const float& deltaTime)
@@ -95,11 +122,15 @@ void Player::updateAttack(const float & deltaTime)
 
 		this->mIsAttacking = true;
 
+		this->mIsMuzzleOn = true;
+
 		this->mKeyTime = 0.F;
 
 		this->mShootTimer = 0.F;
 
 		this->pAudio.play();
+
+		this->mProjectiles.createMuzzleFlash(sf::Vector2f(this->mPlayerSprite.getPosition().x + 150, this->mPlayerSprite.getPosition().y - 10), sf::Vector2f(0.6F, 0.5F));
 	}
 }
 
@@ -126,9 +157,10 @@ void Player::update(const float& deltaTime)
 
 	this->updateAnimations(deltaTime);
 
-
 	for (size_t i = 0; i < this->mProjectile.size(); i++)
 		this->mProjectile[i].update(deltaTime);
+
+	this->mProjectiles.update(deltaTime);
 }
 
 void Player::updateAnimations(const float & deltaTime)
@@ -144,6 +176,8 @@ void Player::updateAnimations(const float & deltaTime)
 		if (this->pAnimationComponent->play("ATTACK", deltaTime, true))
 		{
 			this->mIsAttacking = false;
+
+			this->mIsMuzzleOn = false;
 
 			if (this->mPlayerSprite.getScale().x > 0.f) //Facing left
 				this->mPlayerSprite.setOrigin(0.f, 0.f);

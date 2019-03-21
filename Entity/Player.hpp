@@ -21,6 +21,8 @@ public:
 	void startContact();
 	void endContact();
 
+	inline const int getProjectileSize() { return this->mProjectile.size(); }
+	inline sf::Sprite getSprite() { return this->mPlayerSprite; }
 	inline sf::FloatRect getGobalBounds()const { return this->mPlayerSprite.getGlobalBounds(); }
 	inline sf::Vector2f getPosition() const { return this->mPlayerSprite.getPosition(); }
 
@@ -35,15 +37,18 @@ private:
 	bool mIsContact;
 	bool mIsAttacking;
 	bool mIsFiring;
-
-	float mKeyTimeMax;
-	float mKeyTime;
-
+	bool mIsMuzzleOn;
+	
 	int mCurrentWeapon;
 
+	float mMuzzleTimerMax;
+	float mMuzzleTimer;
+	float mKeyTimeMax;
+	float mKeyTime;
 	float mShootTimer;
 	float mShootTimerMax;
 
+	void initVariables();
 	void currentWeapon(const float& deltaTime);
 	void loadProjectile();
 	void updateAttack(const float& deltaTime);
@@ -53,10 +58,13 @@ private:
 
 	sf::Texture mPlayerTexture;
 	sf::Sprite mPlayerSprite;
+
 	sf::Vector2f mPlayerCenter;
+
 	sf::Sound mExplosion;
 	sf::SoundBuffer mBuffer;
 
+	Projectile mProjectiles;
 	std::vector<Projectile> mProjectile;
 
 	static std::vector<sf::Texture> mPlayerProjectileTextures;
