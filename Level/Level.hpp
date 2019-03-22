@@ -1,7 +1,6 @@
 #pragma once
 #include <Entity/Player.hpp>
-#include <Entity/Enemies/Enemies.hpp>
-#include <Collision/Collision.hpp>
+#include <Entity/Enemies/EnemyTank.hpp>
 
 class Level
 {
@@ -14,8 +13,9 @@ public:
 	virtual void initLevel() = 0;
 
 	void playerInput(const float& deltaTime);
-
-	void collision(const float& deltaTime);
+	void removeProjectile();
+	bool collision(const float& deltaTime);
+	bool playerEnemyCollision(const float& deltaTime);
 	
 protected:
 	std::stack<Level*>* pLevel;
@@ -25,8 +25,8 @@ protected:
 	Player pPlayer;
 	std::vector<Player> player;
 
-	Enemies pEnemies;
-	std::vector<Enemies> enemy;
+	EnemyTank pEnemeyTank;
+	std::vector<EnemyTank> enemyTank;
 
 	bool pLoadLevel;
 };

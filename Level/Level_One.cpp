@@ -14,17 +14,15 @@ void Level_One::update(const float& deltaTime)
 {
 	this->collision(deltaTime);
 
+	this->playerEnemyCollision(deltaTime);
+
 	this->pPlayer.update(deltaTime);
 
 	this->playerInput(deltaTime);
 
-	this->pEnemies.update(deltaTime);
+	this->pEnemeyTank.update(deltaTime);
 
-	for (size_t j = 0; j < this->player.size(); j++)
-		this->player[j].update(deltaTime);
-
-	for (size_t k = 0; k < this->enemy.size(); k++)
-		enemy[k].update(deltaTime);
+	this->removeProjectile();
 }
 
 void Level_One::render(sf::RenderTarget & target)
@@ -33,7 +31,7 @@ void Level_One::render(sf::RenderTarget & target)
 
 	pPlayer.render(target);
 
-	pEnemies.render(target);
+	pEnemeyTank.render(target);
 }
 
 void Level_One::initLevel()
@@ -42,16 +40,7 @@ void Level_One::initLevel()
 		std::cerr << "Level One failed to fucking load" << "\n";
 
 	this->mLevelOneSprite.setTexture(this->mLevelOneTexture);
-
-	this->player.push_back(Player());
-
-	this->enemy.push_back(Enemies());
 }
 
-void Level_One::collisions()
-{
-	if (pPlayer.getGobalBounds().intersects(pEnemies.getGobalBounds()))
-		std::cout << "collision" << "\n";
-}
 
 

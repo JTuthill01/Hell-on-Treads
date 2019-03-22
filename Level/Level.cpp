@@ -14,10 +14,31 @@ void Level::playerInput(const float & deltaTime)
 		this->pPlayer.move(-0.8F, 0.F, deltaTime);
 }
 
-void Level::collision(const float& deltaTime)
+void Level::removeProjectile()
 {
-	if (this->pPlayer.getGobalBounds().intersects(this->pEnemies.getGobalBounds()))
-		std::cout << "Collision" << "\n";
+	for (size_t i = 0; i < this->pPlayer.getProjectileSize(); i++)
+		if (this->pPlayer.getProjectile(i).getProjectilePosition().x > this->pWindow->getSize().x)
+			this->pPlayer.remove();
+}
+
+bool Level::collision(const float& deltaTime)
+{
+	for (size_t i = 0; i < this->pPlayer.getProjectileSize(); i++)
+	{
+		if (this->pPlayer.getProjectile(i).getGobalBounds().intersects(this->pEnemeyTank.getGobalBounds()))
+			std::cout << ".." << "\n";
+
+		return true;
+	}
+	return false;
+}
+
+bool Level::playerEnemyCollision(const float& deltaTime)
+{
+	if (pPlayer.getGobalBounds().intersects(this->pEnemeyTank.getGobalBounds()))
+		return true;
+	
+	return false;
 }
 
 
