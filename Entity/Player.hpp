@@ -12,7 +12,8 @@ public:
 	Player();
 	~Player();
 
-	Projectile& getProjectile(unsigned index);
+	Projectile& getPlayerProjectile(unsigned index);
+	void removePlayerProjectile(unsigned index);
 
 	void render(sf::RenderTarget& target);
 	void update(const float& deltaTime);
@@ -21,8 +22,8 @@ public:
 	void startContact();
 	void endContact();
 
-	inline const int getProjectileSize() { return this->mProjectile.size(); }
-	inline sf::Sprite getSprite() { return this->mPlayerSprite; }
+	inline const int getPlayerProjectileSize() { return this->mPlayerProjectile.size(); }
+	inline sf::Sprite getPlayerSprite() { return this->mPlayerSprite; }
 	inline sf::FloatRect getGobalBounds()const { return this->mPlayerSprite.getGlobalBounds(); }
 	inline sf::Vector2f getPosition() const { return this->mPlayerSprite.getPosition(); }
 
@@ -43,8 +44,10 @@ private:
 
 	float mMuzzleTimerMax;
 	float mMuzzleTimer;
+
 	float mKeyTimeMax;
 	float mKeyTime;
+
 	float mShootTimer;
 	float mShootTimerMax;
 
@@ -64,8 +67,8 @@ private:
 	sf::Sound mExplosion;
 	sf::SoundBuffer mBuffer;
 
-	Projectile mProjectiles;
-	std::vector<Projectile> mProjectile;
+	Projectile mMuzzle;
+	std::vector<Projectile> mPlayerProjectile;
 
 	static std::vector<sf::Texture> mPlayerProjectileTextures;
 };

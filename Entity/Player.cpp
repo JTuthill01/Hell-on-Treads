@@ -11,17 +11,14 @@ Player::Player()
 		std::cerr << "Failed to load texture" << "\n";
 
 	this->mPlayerSprite.setTexture(this->mPlayerTexture);
-	this->mPlayerSprite.setScale(1.7F, 1.7F);
-
-	this->mPlayerSprite.setOrigin( this->mPlayerSprite.getLocalBounds().width / 2, this->mPlayerSprite.getLocalBounds().height / 2);
 
 	this->mPlayerSprite.setPosition(300.F, 710.F);
 
 	this->createMovementComponent(350.f, 16.f, 6.f);
 	this->createAnimationComponent(this->mPlayerTexture);
 
-	this->pAnimationComponent->addAnimation("MOVE", 5.f, 0, 0, 7, 0, 256, 256);
-	this->pAnimationComponent->addAnimation("ATTACK", 5.f, 0, 2, 7, 2, 256, 256);
+	this->pAnimationComponent->addAnimation("MOVE", 5.f, 0, 0, 7, 0, 435, 435);
+	this->pAnimationComponent->addAnimation("ATTACK", 5.f, 0, 1, 7, 1, 435, 435);
 
 	this->pAudio.loadSound("Resources/Sounds/Explosions/DeathFlash.flac");
 	this->pAudio.setVolume(20.F);
@@ -33,17 +30,19 @@ Player::Player()
 
 Player::~Player() = default;
 
-Projectile& Player::getProjectile(unsigned index) { return this->mProjectile[index]; }
+Projectile& Player::getPlayerProjectile(unsigned index) { return this->mPlayerProjectile[index]; }
+
+void Player::removePlayerProjectile(unsigned index) { this->mPlayerProjectile.erase(this->mPlayerProjectile.begin() + index); }
 
 void Player::render(sf::RenderTarget & target) 
 {
 	target.draw(this->mPlayerSprite); 
 
-	for (size_t i = 0; i < this->mProjectile.size(); i++)
-		this->mProjectile[i].render(target);
+	for (size_t i = 0; i < this->mPlayerProjectile.size(); i++)
+		this->mPlayerProjectile[i].render(target);
 
 	if(this->mIsMuzzleOn)
-		this->mProjectiles.render(target);
+		this->mMuzzle.render(target);
 }
 
 void Player::initVariables()
@@ -74,19 +73,19 @@ void Player::initVariables()
 void Player::currentWeapon(const float& deltaTime)
 {
 	if (this->mCurrentWeapon == REGULAR)
-		this->mProjectile.push_back(Projectile(&Player::mPlayerProjectileTextures[REGULAR], sf::Vector2f(this->mPlayerSprite.getPosition().x + 300, this->mPlayerSprite.getPosition().y + 195),
+		this->mPlayerProjectile.push_back(Projectile(&Player::mPlayerProjectileTextures[REGULAR], sf::Vector2f(this->mPlayerSprite.getPosition().x + 300, this->mPlayerSprite.getPosition().y + 195),
 			sf::Vector2f(-0.4F, 0.5F), sf::Vector2f(1.F, 0.F)));
 
 	else if (this->mCurrentWeapon == FIRE)
-		this->mProjectile.push_back(Projectile(&Player::mPlayerProjectileTextures[FIRE], sf::Vector2f(this->mPlayerSprite.getPosition().x + 300, this->mPlayerSprite.getPosition().y + 195),
+		this->mPlayerProjectile.push_back(Projectile(&Player::mPlayerProjectileTextures[FIRE], sf::Vector2f(this->mPlayerSprite.getPosition().x + 300, this->mPlayerSprite.getPosition().y + 195),
 			sf::Vector2f(-0.4F, 0.5F), sf::Vector2f(1.F, 0.F)));
 
 	else if (this->mCurrentWeapon == ICE)
-		this->mProjectile.push_back(Projectile(&Player::mPlayerProjectileTextures[ICE], sf::Vector2f(this->mPlayerSprite.getPosition().x + 300, this->mPlayerSprite.getPosition().y + 195),
+		this->mPlayerProjectile.push_back(Projectile(&Player::mPlayerProjectileTextures[ICE], sf::Vector2f(this->mPlayerSprite.getPosition().x + 300, this->mPlayerSprite.getPosition().y + 195),
 			sf::Vector2f(-0.4F, 0.5F), sf::Vector2f(1.F, 0.F)));
 
 	else if (this->mCurrentWeapon == CORROSIVE)
-		this->mProjectile.push_back(Projectile(&Player::mPlayerProjectileTextures[CORROSIVE], sf::Vector2f(this->mPlayerSprite.getPosition().x + 300, this->mPlayerSprite.getPosition().y + 195),
+		this->mPlayerProjectile.push_back(Projectile(&Player::mPlayerProjectileTextures[CORROSIVE], sf::Vector2f(this->mPlayerSprite.getPosition().x + 300, this->mPlayerSprite.getPosition().y + 195),
 			sf::Vector2f(-0.4F, 0.5F), sf::Vector2f(1.F, 0.F)));
 }
 
@@ -130,7 +129,7 @@ void Player::updateAttack(const float & deltaTime)
 
 		this->pAudio.play();
 
-		this->mProjectiles.createMuzzleFlash(sf::Vector2f(this->mPlayerSprite.getPosition().x + 150, this->mPlayerSprite.getPosition().y - 10), sf::Vector2f(0.6F, 0.5F));
+		this->mMuzzle.createMuzzleFlash(sf::Vector2f(this->mPlayerSprite.getPosition().x + 150, this->mPlayerSprite.getPosition().y - 10), sf::Vector2f(0.6F, 0.5F));
 	}
 }
 
@@ -157,10 +156,10 @@ void Player::update(const float& deltaTime)
 
 	this->updateAnimations(deltaTime);
 
-	for (size_t i = 0; i < this->mProjectile.size(); i++)
-		this->mProjectile[i].update(deltaTime);
+	for (size_t i = 0; i < this->mPlayerProjectile.size(); i++)
+		this->mPlayerProjectile[i].update(deltaTime);
 
-	this->mProjectiles.update(deltaTime);
+	this->mMuzzle.update(deltaTime);
 }
 
 void Player::updateAnimations(const float & deltaTime)
