@@ -11,10 +11,8 @@ namespace AuroraLoader
 		AuroraLoader();
 		~AuroraLoader();
 
-		void loadAurora();
 		void setAurora(const float& deltaTime);
 		void render(sf::RenderTarget& target);
-		void update(const float& deltaTime);
 
 	private:
 		Player mPlayer;
