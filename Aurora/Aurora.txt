@@ -1,0 +1,3 @@
+Resources/Textures/Aurora/auroraFire.png
+Resources/Textures/Aurora/auroraIce.png
+Resources/Textures/Aurora/auroraCorrosion.png
