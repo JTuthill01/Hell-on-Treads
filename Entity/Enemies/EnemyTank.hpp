@@ -1,17 +1,13 @@
 #pragma once
-#include <Entity/Player.hpp>
-#include <Resources/Audio.hpp>
-#include <Component/AnimationComponent.hpp>
-#include <Component/MovementComponent.hpp>
-#include <Projectile/Projectile.hpp>
+#include <Entity/Player/Player.hpp>
+#include <Entity/Entity.hpp>
 
-class EnemyTank
+class EnemyTank : Entity
 {
 public:
 	EnemyTank();
 	~EnemyTank();
 
-	Projectile& getEnemyTankProjectile(unsigned index);
 	void removeEnemyTankProjectile(unsigned index);
 
 	void render(sf::RenderTarget& target);
@@ -19,9 +15,13 @@ public:
 	void move(const float direction_x, const float direction_y, const float& deltaTime);
 	void updateAnimations(const float& deltaTime);
 
+	//Getters
+	Projectile& getEnemyTankProjectile(unsigned index);
+	inline int getEnemyType() { return this->mEnemeyType; }
 	inline const int getEnemyTankProjectileSize() { return this->mEnemyTankProjectile.size(); }
 	inline sf::Sprite getEnemyTankSprite() { return this->mEnemyTankSprite; }
 	inline sf::FloatRect getGobalBounds()const { return this->mEnemyTankSprite.getGlobalBounds(); }
+	sf::Vector2f getEnemyTankSpriteCenter();
 	inline sf::Vector2f getEnemyTankPosition() const { return this->mEnemyTankSprite.getPosition(); }
 	inline void setEnemyTankColor(sf::Color color) { this->mEnemyTankSprite.setColor(color); }
 
@@ -32,6 +32,8 @@ protected:
 	Audio pAudio;
 
 private:
+	int mEnemeyType;
+
 	bool mIsAttacking;
 	bool mIsFiring;
 	bool mIsMuzzleOn;
@@ -51,13 +53,12 @@ private:
 	void loadProjectile();
 	void updateAttack(const float& deltaTime);
 
+	sf::Vector2f mEnemySprite;
+
 	sf::Texture mEnemyTankTexture;
 	sf::Sprite mEnemyTankSprite;
 
-	sf::Texture mEnemyTexture;
-	sf::Sprite mEnemySprite;
-
-	sf::Vector2f mEnemyCenter;
+	sf::Vector2f mEnemyTankSpriteCenter;
 
 	sf::Sound mExplosion;
 	sf::SoundBuffer mBuffer;
@@ -67,4 +68,3 @@ private:
 
 	static std::vector<sf::Texture> mEnemyProjectileTextures;
 };
-

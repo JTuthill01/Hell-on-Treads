@@ -22,15 +22,25 @@ EnemyTank::EnemyTank() : mShootTimer(mShootTimerMax), mShootTimerMax(50.F)
 
 	this->pAudio.loadSound("Resources/Sounds/Explosions/DeathFlash.flac");
 	this->pAudio.setVolume(20.F);
+
+	this->mEnemeyType = ENEMY_ICE;
 }
 
 EnemyTank::~EnemyTank() = default;
 
 Projectile& EnemyTank::getEnemyTankProjectile(unsigned index) { return this->mEnemyTankProjectile[index]; }
 
+sf::Vector2f EnemyTank::getEnemyTankSpriteCenter()
+{
+	this->mEnemyTankSpriteCenter.x = this->mEnemyTankSprite.getGlobalBounds().left + this->mEnemyTankSprite.getGlobalBounds().width / 2;
+	this->mEnemyTankSpriteCenter.y = this->mEnemyTankSprite.getGlobalBounds().top + this->mEnemyTankSprite.getGlobalBounds().height / 2;
+
+	return this->mEnemyTankSpriteCenter;
+}
+
 void EnemyTank::removeEnemyTankProjectile(unsigned index) { this->mEnemyTankProjectile.erase(this->mEnemyTankProjectile.begin() + index); }
 
-void EnemyTank::render(sf::RenderTarget& target)
+void EnemyTank::render(sf::RenderTarget & target)
 {
 	target.draw(this->mEnemyTankSprite);
 
@@ -51,7 +61,11 @@ void EnemyTank::update(const float& deltaTime)
 
 	this->updateAttack(deltaTime);
 
-	this->mEnemyTankSprite.move(sf::Vector2f(-0.6F, 0.F));
+	if(!this->pIsFrozen)
+		this->mEnemyTankSprite.move(sf::Vector2f(-0.6F, 0.F));
+
+	else
+		this->mEnemyTankSprite.move(sf::Vector2f(0.F, 0.F));
 
 	for (size_t i = 0; i < this->mEnemyTankProjectile.size(); i++)
 		this->mEnemyTankProjectile[i].update(deltaTime);
@@ -110,8 +124,37 @@ void EnemyTank::updateAnimations(const float& deltaTime)
 
 void EnemyTank::enemyShoot()
 {
-	this->mEnemyTankProjectile.push_back(Projectile(&EnemyTank::mEnemyProjectileTextures[REGULAR], this->mEnemyTankSprite.getPosition().x + 150, this->mEnemyTankSprite.getPosition().y + 180,
-		sf::Vector2f(0.4F, 0.5F), sf::Vector2f(1.F, 0.F)));
+	if (this->mEnemeyType == ENEMY_REGULAR)
+	{
+		this->mEnemyTankProjectile.push_back(Projectile(&EnemyTank::mEnemyProjectileTextures[ENEMY_REGULAR], this->mEnemyTankSprite.getPosition().x + 150, this->mEnemyTankSprite.getPosition().y + 180,
+			sf::Vector2f(0.4F, 0.5F), sf::Vector2f(1.F, 0.F)));
+
+		this->mEnemyTankSprite.setColor(sf::Color(222, 184, 135, 255));
+	}
+
+	else if (this->mEnemeyType == ENEMY_FIRE)
+	{
+		this->mEnemyTankProjectile.push_back(Projectile(&EnemyTank::mEnemyProjectileTextures[ENEMY_FIRE], this->mEnemyTankSprite.getPosition().x + 150, this->mEnemyTankSprite.getPosition().y + 180,
+			sf::Vector2f(0.8F, 0.7F), sf::Vector2f(1.F, 0.F)));
+
+		this->mEnemyTankSprite.setColor(sf::Color(178, 34, 34, 255));
+	}
+
+	else if (this->mEnemeyType == ENEMY_ICE)
+	{
+		this->mEnemyTankProjectile.push_back(Projectile(&EnemyTank::mEnemyProjectileTextures[ENEMY_ICE], this->mEnemyTankSprite.getPosition().x + 150, this->mEnemyTankSprite.getPosition().y + 180,
+			sf::Vector2f(0.8F, 0.7F), sf::Vector2f(1.F, 0.F)));
+
+		this->mEnemyTankSprite.setColor(sf::Color(0, 191, 255, 255));
+	}
+
+	else if (this->mEnemeyType == ENEMY_CORROSIVE)
+	{
+		this->mEnemyTankProjectile.push_back(Projectile(&EnemyTank::mEnemyProjectileTextures[ENEMY_CORROSIVE], this->mEnemyTankSprite.getPosition().x + 150, this->mEnemyTankSprite.getPosition().y + 180,
+			sf::Vector2f(0.8F, 0.7F), sf::Vector2f(1.F, 0.F)));
+
+		this->mEnemyTankSprite.setColor(sf::Color(0, 255, 0, 255));
+	}
 
 	this->mShootTimer = 0.F;
 }
@@ -137,7 +180,7 @@ void EnemyTank::createMovementComponent(const float max_velocity, const float ac
 		deceleration);
 }
 
-void EnemyTank::createAnimationComponent(sf::Texture& texture_sheet)
+void EnemyTank::createAnimationComponent(sf::Texture & texture_sheet)
 {
 	this->pAnimationComponent = new AnimationComponent(this->mEnemyTankSprite, texture_sheet);
 }
@@ -149,7 +192,6 @@ void EnemyTank::loadEnemyTanks()
 
 	this->mEnemyTankSprite.setTexture(this->mEnemyTankTexture);
 	this->mEnemyTankSprite.setPosition(1700.F, 710.F);
-	this->mEnemyTankSprite.setColor(sf::Color::Green);
 }
 
 void EnemyTank::loadProjectile()
@@ -157,6 +199,21 @@ void EnemyTank::loadProjectile()
 	sf::Texture temp;
 	if (!temp.loadFromFile("Resources/Textures/Bullets/Bullet_3.png"))
 		std::cerr << "Failed to fucking the fucking bomb texture" << "\n";
+
+	this->mEnemyProjectileTextures.push_back(temp);
+
+	if (!temp.loadFromFile("Resources/Textures/Bullets/Fire1.png"))
+		std::cerr << "The fucking bullet texture failed to fucking load" << "\n";
+
+	this->mEnemyProjectileTextures.push_back(temp);
+
+	if (!temp.loadFromFile("Resources/Textures/Bullets/Ice1.png"))
+		std::cerr << "The fucking bullet texture failed to fucking load" << "\n";
+
+	this->mEnemyProjectileTextures.push_back(temp);
+
+	if (!temp.loadFromFile("Resources/Textures/Bullets/Corrosive1.png"))
+		std::cerr << "The fucking bullet texture failed to fucking load" << "\n";
 
 	this->mEnemyProjectileTextures.push_back(temp);
 }
