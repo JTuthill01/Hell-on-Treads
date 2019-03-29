@@ -1,47 +1,59 @@
 #include "stdafx.hpp"
 #include "Entity.hpp"
 
-Entity::Entity()
+Entity::Entity() : pIsFrozen(false)
 {
-	pDamage = 2;
-	pDamageMax = 6;
-
-	pIsFrozen = false;
 }
 
 Entity::~Entity() = default;
 
-const int Entity::playerDamage() const
+void Entity::upDateAttacks(bool isAttacking)
 {
-	int damage = 0;
-	srand(time(0));
-
-	switch (this->pCurrentWeapon)
-	{
-	case FIRE:
-		damage = rand() % this->pDamage + this->pDamageMax;
-		break;
-
-	case ICE:
-		damage = rand() % this->pDamage + this->pDamageMax;
-		damage *= 2;
-
-		break;
-
-	case CORROSIVE:
-		damage = rand() % this->pDamage + this->pDamageMax;
-		damage *= rand() % 3;
-
-	default:
-		break;
-	}
-
-	return damage;
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		isAttacking = true;
 }
 
-const int Entity::enemyDamage() const
+void Entity::animations(sf::Sprite& sprite, const float& deltaTime, bool isAttacking)
 {
-	return 0;
+	if (isAttacking)
+	{
+		if (sprite.getScale().x > 0.f) //Facing left
+			sprite.setOrigin(96.f, 0.f);
+
+		if (this->pAnimationComponent->play("ATTACK", deltaTime, true))
+		{
+			isAttacking = false;
+
+			if (sprite.getScale().x > 0.f) //Facing left
+				sprite.setOrigin(0.f, 0.f);
+		}
+	}
+
+	else if (this->pMovementComponent->getState(MOVING))
+	{
+		if (sprite.getScale().x < 0.f)
+		{
+			sprite.setOrigin(0.f, 0.f);
+			sprite.setScale(1.f, 1.f);
+		}
+
+		this->pAnimationComponent->play("MOVE", deltaTime,
+			this->pMovementComponent->getVelocity().x,
+			this->pMovementComponent->getMaxVelocity());
+	}
+
+	else if (this->pMovementComponent->getState(MOVING))
+	{
+		if (sprite.getScale().x < 0.f)
+		{
+			sprite.setOrigin(140.f, 0.f);
+			sprite.setScale(1.f, 1.f);
+		}
+
+		this->pAnimationComponent->play("MOVE", deltaTime,
+			this->pMovementComponent->getVelocity().x,
+			this->pMovementComponent->getMaxVelocity());
+	}
 }
 
 int Entity::frozen()
@@ -51,9 +63,8 @@ int Entity::frozen()
 	if (this->pFrozen <= 5)
 		this->pIsFrozen = true;
 
-	else if(this->pFrozen > 5)
+	else if (this->pFrozen > 5)
 		this->pIsFrozen = false;
 
-
-	return this->pIsFrozen;
+	return this->pFrozen;
 }

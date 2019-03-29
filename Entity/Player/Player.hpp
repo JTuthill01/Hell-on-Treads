@@ -1,13 +1,13 @@
 #pragma once
 #include <Entity/Entity.hpp>
 
-
-
 class Player : Entity
 {
 public:
 	Player();
 	~Player();
+
+	const int playerDealDamage() const;
 
 	void removePlayerProjectile(unsigned index);
 	void render(sf::RenderTarget& target);
@@ -40,12 +40,15 @@ public:
 
 	bool IsAttacking() const { return this->mIsAttacking; }
 
-protected:
-	MovementComponent* pMovementComponent;
-	AnimationComponent* pAnimationComponent;
-	Audio pAudio;
-
 private:
+	//Damage
+	int mDamage;
+	int mDamageMax;
+
+	//HP
+	int mHp;
+	int mHpMax;
+
 	//Booleans
 	bool mIsAttacking;
 	bool mIsFiring;
@@ -62,6 +65,7 @@ private:
 	float mShootTimerMax;
 
 	//Private shit
+	void hpBar();
 	void initVariables();
 	void currentWeapon(const float& deltaTime);
 	void loadProjectile();
@@ -71,6 +75,8 @@ private:
 	void createAnimationComponent(sf::Texture& texture_sheet);
 
 	//Sprites & Textures
+	sf::RectangleShape mHpBar;
+
 	sf::Texture mAuroaDyingTexture;
 	sf::Sprite mAuroaDyingSprite;
 

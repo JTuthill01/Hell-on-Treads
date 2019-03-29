@@ -8,8 +8,9 @@ public:
 	EnemyTank();
 	~EnemyTank();
 
+	const int enemyDealDamage() const;
 	void removeEnemyTankProjectile(unsigned index);
-
+	void takeDamage(int damage);
 	void render(sf::RenderTarget& target);
 	void update(const float& deltaTime);
 	void move(const float direction_x, const float direction_y, const float& deltaTime);
@@ -17,6 +18,7 @@ public:
 
 	//Getters
 	Projectile& getEnemyTankProjectile(unsigned index);
+	inline int getHp() { return this->mHp; }
 	inline int getEnemyType() { return this->mEnemeyType; }
 	inline const int getEnemyTankProjectileSize() { return this->mEnemyTankProjectile.size(); }
 	inline sf::Sprite getEnemyTankSprite() { return this->mEnemyTankSprite; }
@@ -26,14 +28,14 @@ public:
 	inline void setEnemyTankColor(sf::Color color) { this->mEnemyTankSprite.setColor(color); }
 
 protected:
-	Projectile pMuzzle;
-	MovementComponent* pMovementComponent;
-	AnimationComponent* pAnimationComponent;
-	Audio pAudio;
 
 private:
-	int mEnemeyType;
+	int mHp;
+	int mHpMax;
+	int mDamage;
+	int mDamageMax;
 
+	bool mIsAlive;
 	bool mIsAttacking;
 	bool mIsFiring;
 	bool mIsMuzzleOn;
@@ -44,6 +46,7 @@ private:
 	float mMuzzleTimerMax;
 	float mMuzzleTimer;
 
+	void enemyDead(const float& deltaTime);
 	void enemyShoot();
 	void initVariables();
 	void createMovementComponent(const float max_velocity,

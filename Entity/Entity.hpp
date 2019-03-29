@@ -14,8 +14,8 @@ public:
 	Entity();
 	~Entity();
 
-	const int playerDamage() const;
-	const int enemyDamage() const;
+	virtual void upDateAttacks(bool isAttacking);
+	virtual void animations(sf::Sprite& sprite, const float& deltaTime, bool isAttacking = false);
 	int frozen();
 
 	inline const bool getCorrosive() { return this->pIsCorrosiveShot; }
@@ -23,6 +23,11 @@ public:
 	inline const bool getFrozen() { return this->pIsIceShot; }
 
 protected:
+	MovementComponent* pMovementComponent;
+	AnimationComponent* pAnimationComponent;
+	Audio pAudio;
+	Projectile pMuzzle;
+
 	//Weapons
 	int pCurrentWeapon;
 	bool pIsFireShot;
@@ -31,10 +36,7 @@ protected:
 	bool pIsCorrosiveShot;
 
 	//Damage
-	int pHp;
-	int pHpMax;
-	int pDamage;
-	int pDamageMax;
 	int pFrozen;
-};
 
+	int mEnemeyType;
+};

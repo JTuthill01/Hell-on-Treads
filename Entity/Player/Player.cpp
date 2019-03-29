@@ -13,6 +13,7 @@ Player::Player()
 	this->mPlayerSprite.setTexture(this->mPlayerTexture);
 
 	this->mPlayerSprite.setPosition(300.F, 710.F);
+	//this->mPlayerSprite.setScale(1.2F, 1.2F);
 
 	this->createMovementComponent(350.f, 16.f, 6.f);
 	this->createAnimationComponent(this->mPlayerTexture);
@@ -23,15 +24,48 @@ Player::Player()
 	this->pAudio.loadSound("Resources/Sounds/Explosions/DeathFlash.flac");
 	this->pAudio.setVolume(20.F);
 
-	this->pCurrentWeapon = ICE;
+	this->pCurrentWeapon = CORROSIVE;
 
 	this->loadProjectile();
 
 	this->mPlayerCenter.x = this->mPlayerSprite.getPosition().x + this->mPlayerSprite.getGlobalBounds().width / 2;
 	this->mPlayerCenter.y = this->mPlayerSprite.getPosition().y + this->mPlayerSprite.getGlobalBounds().height / 2;
+
+	this->hpBar();
 }
 
 Player::~Player() = default;
+
+const int Player::playerDealDamage() const
+{
+	int damage = 0;
+
+	switch (this->pCurrentWeapon)
+	{
+	case REGULAR:
+		damage = rand() % this->mDamage + this->mDamageMax;
+		break;
+
+	case FIRE:
+		damage = rand() % this->mDamage + this->mDamageMax;
+		break;
+
+	case ICE:
+		damage = rand() % this->mDamage + this->mDamageMax;
+		damage *= 2;
+
+		break;
+
+	case CORROSIVE:
+		damage = rand() % this->mDamage + this->mDamageMax;
+		damage *= rand() % 3;
+
+	default:
+		break;
+	}
+
+	return damage;
+}
 
 Projectile& Player::getPlayerProjectile(unsigned index) { return this->mPlayerProjectile[index]; }
 
@@ -43,11 +77,20 @@ void Player::render(sf::RenderTarget & target)
 
 	target.draw(this->mAuroaDyingSprite);
 
+	target.draw(this->mHpBar);
+
 	for (size_t i = 0; i < this->mPlayerProjectile.size(); i++)
 		this->mPlayerProjectile[i].render(target);
 
 	if (this->mIsMuzzleOn)
 		this->mMuzzle.render(target);
+}
+
+void Player::hpBar()
+{
+	this->mHpBar.setSize(sf::Vector2f(200.F, 22.F));
+	this->mHpBar.setFillColor(sf::Color::Blue);
+	this->mHpBar.setPosition(this->mPlayerSprite.getPosition().x, this->mPlayerSprite.getPosition().y + 50);
 }
 
 void Player::initVariables()
@@ -71,6 +114,14 @@ void Player::initVariables()
 	this->mMuzzleTimerMax = 1.5F;
 
 	this->mMuzzleTimer = this->mMuzzleTimerMax;
+
+	this->mHp = 8;
+
+	this->mHpMax = 10;
+
+	this->mDamage = 2;
+
+	this->mDamageMax = 3;
 }
 
 void Player::currentWeapon(const float& deltaTime)
@@ -151,7 +202,7 @@ void Player::update(const float& deltaTime)
 {
 	this->auroa();
 
-	this->playerDamage();
+	this->playerDealDamage();
 
 	this->mKeyTime += 1.F * deltaTime * 62.5F;
 
@@ -230,7 +281,7 @@ void Player::move(const float direction_x, const float direction_y, const float&
 
 void Player::auroa()
 {
-	if (this->pHp < 4)
+	if (this->mHp < 4)
 	{
 		if (!this->mAuroaDyingTexture.loadFromFile("Resources/Textures/Aurora/auroaDying.png"))
 			std::cerr << "The fucking Aurora failed to fucking load" << "\n";

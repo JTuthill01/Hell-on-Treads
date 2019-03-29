@@ -3,7 +3,7 @@
 
 std::vector<sf::Texture> EnemyTank::mEnemyProjectileTextures;
 
-EnemyTank::EnemyTank() : mShootTimer(mShootTimerMax), mShootTimerMax(50.F)
+EnemyTank::EnemyTank() : mShootTimer(mShootTimerMax), mShootTimerMax(50.F), mIsAlive(true)
 {
 	this->initVariables();
 
@@ -12,6 +12,7 @@ EnemyTank::EnemyTank() : mShootTimer(mShootTimerMax), mShootTimerMax(50.F)
 
 	this->pAnimationComponent->addAnimation("MOVE", 5.f, 0, 0, 7, 0, 435, 435);
 	this->pAnimationComponent->addAnimation("ATTACK", 5.f, 0, 1, 7, 1, 435, 435);
+	this->pAnimationComponent->addAnimation("DEAD", 5.f, 0, 2, 10, 2, 435, 435);
 
 	this->pAudio.loadSound("Resources/Sounds/Explosions/explosion1.ogg");
 	this->pAudio.setVolume(10.F);
@@ -23,7 +24,10 @@ EnemyTank::EnemyTank() : mShootTimer(mShootTimerMax), mShootTimerMax(50.F)
 	this->pAudio.loadSound("Resources/Sounds/Explosions/DeathFlash.flac");
 	this->pAudio.setVolume(20.F);
 
-	this->mEnemeyType = ENEMY_ICE;
+	this->mEnemeyType = ENEMY_REGULAR;
+
+	this->mHp = 20;
+	this->mHpMax = 20;
 }
 
 EnemyTank::~EnemyTank() = default;
@@ -38,7 +42,48 @@ sf::Vector2f EnemyTank::getEnemyTankSpriteCenter()
 	return this->mEnemyTankSpriteCenter;
 }
 
+const int EnemyTank::enemyDealDamage() const
+{
+	int damage = 0;
+
+	switch (this->mEnemeyType)
+	{
+	case ENEMY_REGULAR:
+		damage = damage = rand() % this->mDamage + this->mDamageMax;
+		break;
+
+	case ENEMY_FIRE:
+		damage = rand() % this->mDamage + this->mDamageMax - 2;
+		break;
+
+	case ENEMY_ICE:
+		damage = damage = rand() % this->mDamage + this->mDamageMax - 1;
+		break;
+
+	case ENEMY_CORROSIVE:
+		damage = rand() % this->mDamage + this->mDamageMax;
+		break;
+
+	default:
+		break;
+	}
+
+	return damage;
+}
+
 void EnemyTank::removeEnemyTankProjectile(unsigned index) { this->mEnemyTankProjectile.erase(this->mEnemyTankProjectile.begin() + index); }
+
+void EnemyTank::takeDamage(int damage)
+{
+	this->mHp -= damage;
+
+	if (this->mHp <= 0)
+	{
+		this->mHp = 0;
+
+		this->mIsAlive = false;
+	}
+}
 
 void EnemyTank::render(sf::RenderTarget & target)
 {
@@ -61,7 +106,7 @@ void EnemyTank::update(const float& deltaTime)
 
 	this->updateAttack(deltaTime);
 
-	if(!this->pIsFrozen)
+	if (!this->pIsFrozen)
 		this->mEnemyTankSprite.move(sf::Vector2f(-0.6F, 0.F));
 
 	else
@@ -119,6 +164,26 @@ void EnemyTank::updateAnimations(const float& deltaTime)
 		this->pAnimationComponent->play("MOVE", deltaTime,
 			this->pMovementComponent->getVelocity().x,
 			this->pMovementComponent->getMaxVelocity());
+	}
+
+	this->enemyDead(deltaTime);
+}
+
+void EnemyTank::enemyDead(const float& deltaTime)
+{
+	if (!this->mIsAlive)
+	{
+		this->createMovementComponent(0.F, 0.F, 0.F);
+
+		this->pAnimationComponent->play("DEAD", deltaTime, true);
+
+		this->mIsAttacking = false;
+
+		this->mIsMuzzleOn = false;
+
+		this->pAudio.stop();
+
+		this->mEnemyTankSprite.move(0.F, 0.F);
 	}
 }
 
@@ -220,7 +285,7 @@ void EnemyTank::loadProjectile()
 
 void EnemyTank::updateAttack(const float& deltaTime)
 {
-	if (this->mShootTimer >= this->mShootTimerMax)
+	if (this->mShootTimer >= this->mShootTimerMax && this->mIsAlive)
 	{
 		this->mIsAttacking = true;
 
