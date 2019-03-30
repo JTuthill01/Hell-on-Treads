@@ -43,11 +43,7 @@ void MainMenuState::render(sf::RenderTarget * target)
 void MainMenuState::initTextures()
 {
 	if (!this->mBackgroundTexture.loadFromFile("Resources/Textures/Backgrounds/war2.png"))
-	{
 		std::cerr << "Failed to load the fucking background texture" << "\n";
-
-		EXIT_FAILURE;
-	}
 
 	this->mBackgroundSprite.setTexture(this->mBackgroundTexture);
 }
@@ -55,18 +51,10 @@ void MainMenuState::initTextures()
 void MainMenuState::initFonts()
 {
 	if (!this->mFont.loadFromFile("Resources/Fonts/Anton-Regular.ttf"))
-	{
 		std::cerr << "Font failed to load" << "\n";
-
-		EXIT_FAILURE;
-	}
 
 	if (!this->mFont1.loadFromFile("Resources/Fonts/MetalMacabre.ttf"))
-	{
 		std::cerr << "Font failed to load" << "\n";
-
-		EXIT_FAILURE;
-	}
 }
 
 void MainMenuState::createButtons()

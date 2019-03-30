@@ -8,21 +8,26 @@ GameState::GameState(sf::RenderWindow* window, std::stack<States*>* states) : St
 
 GameState::~GameState()
 {
+	while (!this->mLevels.empty())
+	{
+		delete this->mLevels.top();
+		this->mLevels.pop();
+	}
 }
 
 void GameState::update(const float& deltaTime)
 {
-	for (size_t i = 0; i < this->mLevels.size(); i++)
-		this->mLevels[i]->update(deltaTime);
+	if (!this->mLevels.empty())
+		this->mLevels.top()->update(deltaTime);
 }
 
-void GameState::render(sf::RenderTarget * target)
+void GameState::render(sf::RenderTarget* target)
 {
-	for (size_t i = 0; i < this->mLevels.size(); i++)
-		this->mLevels[i]->render(*target);
+	if (!this->mLevels.empty())
+		this->mLevels.top()->render(*target);
 }
 
 void GameState::initLevel()
 {
-	this->mLevels.push_back(new Level_One(this->pWindow, this->mLevels));
+	this->mLevels.push(new Level_One(this->pWindow, &this->mLevels));
 }

@@ -6,7 +6,7 @@ class Level_Two :
 	public Level
 {
 public:
-	Level_Two(sf::RenderWindow* window, std::vector<Level*> level);
+	Level_Two(sf::RenderWindow* window, std::stack<Level*>* level);
 	virtual ~Level_Two();
 
 	// Inherited via Level

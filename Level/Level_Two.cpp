@@ -1,7 +1,7 @@
 #include "stdafx.hpp"
 #include "Level_Two.hpp"
 
-Level_Two::Level_Two(sf::RenderWindow* window, std::vector<Level*> level) : Level(window, level)
+Level_Two::Level_Two(sf::RenderWindow* window, std::stack<Level*>* level) : Level(window, level)
 {
 	this->initLevel();
 }

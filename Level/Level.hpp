@@ -9,7 +9,7 @@
 class Level
 {
 public:
-	Level(sf::RenderWindow* window, std::vector<Level*> level);
+	Level(sf::RenderWindow* window, std::stack<Level*>* level);
 	~Level();
 
 	virtual void update(const float& deltaTime) = 0;
@@ -23,7 +23,7 @@ protected:
 	void updateLevel(const float& deltaTime);
 	void setExplosions(sf::Vector2f position, sf::Vector2f scale);
 
-	std::vector<Level*> pLevel;
+	std::stack<Level*>* pLevel;
 
 	sf::Texture pBackgroundTexture;
 	sf::Texture mExpolsionTexture;

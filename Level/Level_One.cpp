@@ -1,7 +1,7 @@
 #include "stdafx.hpp"
 #include "Level_One.hpp"
 
-Level_One::Level_One(sf::RenderWindow* window, std::vector<Level*> level) : Level(window, level)
+Level_One::Level_One(sf::RenderWindow* window, std::stack<Level*>* level) : Level(window, level)
 {
 	this->initLevel();
 }
@@ -18,7 +18,7 @@ void Level_One::update(const float& deltaTime)
 	{
 		if (this->pPlayer.getPosition().x > this->pWindow->getSize().x)
 		{
-			this->pLevel.push_back(new Level_Two(this->pWindow, this->pLevel));
+			this->pLevel->push(new Level_Two(this->pWindow, this->pLevel));
 
 			this->pLoadLevel = true;
 		}

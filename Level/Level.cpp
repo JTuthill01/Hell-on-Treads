@@ -3,11 +3,19 @@
 
 std::vector<sf::Texture> Level::pParticleTextures;
 
-Level::Level(sf::RenderWindow* window, std::vector<Level*> level) : pWindow(window), pLevel(level), pLoadLevel(false), pHasExploaded(false)
+Level::Level(sf::RenderWindow* window, std::stack<Level*>* level) : pWindow(window), pLevel(level), pLoadLevel(false), pHasExploaded(false)
 {
 }
 
-Level::~Level() = default;
+Level::~Level()
+{
+	while (!this->pLevel->empty())
+	{
+		delete this->pLevel->top();
+
+		this->pLevel->pop();
+	}
+}
 
 void Level::playerProjectileCollision(const float& deltaTime)
 {
