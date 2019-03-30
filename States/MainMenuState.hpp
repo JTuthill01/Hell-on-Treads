@@ -11,8 +11,8 @@ public:
 	~MainMenuState();
 
 	// Inherited via States
-	virtual void update(const float & deltaTime) override;
-	virtual void render(sf::RenderTarget * target = nullptr) override;
+	virtual void update(const float& deltaTime) override;
+	virtual void render(sf::RenderTarget* target = nullptr) override;
 
 private:
 	void initTextures();
@@ -30,4 +30,3 @@ private:
 
 	std::map<std::string, Button*> mButton;
 };
-

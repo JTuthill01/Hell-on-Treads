@@ -17,4 +17,3 @@ protected:
 
 	std::stack<States*>* pStates;
 };
-

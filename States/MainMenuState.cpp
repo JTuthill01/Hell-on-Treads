@@ -17,11 +17,11 @@ MainMenuState::~MainMenuState()
 		delete it->second;
 }
 
-void MainMenuState::update(const float & deltaTime)
+void MainMenuState::update(const float& deltaTime)
 {
 	this->updateMousePositions();
 
-	for (auto &it : this->mButton)
+	for (auto& it : this->mButton)
 		it.second->update(this->pMousePositionView);
 
 	if (this->mButton["PLAY"]->isPressed())
@@ -80,7 +80,7 @@ void MainMenuState::createButtons()
 
 void MainMenuState::renderButtons(sf::RenderTarget & target)
 {
-	for (auto &it : this->mButton)
+	for (auto& it : this->mButton)
 		it.second->render(target);
 }
 

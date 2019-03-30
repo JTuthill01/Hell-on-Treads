@@ -11,12 +11,11 @@ public:
 	virtual ~GameState();
 
 	// Inherited via States
-	virtual void update(const float & deltaTime) override;
-	virtual void render(sf::RenderTarget * target = nullptr) override;
+	virtual void update(const float& deltaTime) override;
+	virtual void render(sf::RenderTarget* target = nullptr) override;
 
 private:
 	void initLevel();
 
-	std::stack<Level*> mLevels;
+	std::vector<Level*> mLevels;
 };
-

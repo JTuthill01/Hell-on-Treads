@@ -1,7 +1,7 @@
 #include "stdafx.hpp"
 #include "Level_One.hpp"
 
-Level_One::Level_One(sf::RenderWindow* window, std::stack<Level*>* level) : Level(window, level)
+Level_One::Level_One(sf::RenderWindow* window, std::vector<Level*> level) : Level(window, level)
 {
 	this->initLevel();
 }
@@ -12,26 +12,31 @@ Level_One::~Level_One()
 
 void Level_One::update(const float& deltaTime)
 {
-	this->collision(deltaTime);
+	this->updateLevel(deltaTime);
 
-	this->playerEnemyCollision(deltaTime);
+	if (this->pLoadLevel == false)
+	{
+		if (this->pPlayer.getPosition().x > this->pWindow->getSize().x)
+		{
+			this->pLevel.push_back(new Level_Two(this->pWindow, this->pLevel));
 
-	this->pPlayer.update(deltaTime);
-
-	this->playerInput(deltaTime);
-
-	this->pEnemeyTank.update(deltaTime);
-
-	this->removeProjectile();
+			this->pLoadLevel = true;
+		}
+	}
 }
 
-void Level_One::render(sf::RenderTarget & target)
+void Level_One::render(sf::RenderTarget& target)
 {
 	target.draw(this->mLevelOneSprite);
 
-	pPlayer.render(target);
+	if (this->pHasExploaded)
+		target.draw(this->mExpolsionSprite);
 
-	pEnemeyTank.render(target);
+	this->pPlayer.render(target);
+
+	this->pEnemeyTank.render(target);
+
+	this->mAurora.render(target);
 }
 
 void Level_One::initLevel()
@@ -41,6 +46,3 @@ void Level_One::initLevel()
 
 	this->mLevelOneSprite.setTexture(this->mLevelOneTexture);
 }
-
-
-
