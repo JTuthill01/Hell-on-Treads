@@ -4,6 +4,8 @@
 Level_Two::Level_Two(sf::RenderWindow* window, std::stack<Level*>* level) : Level(window, level)
 {
 	this->initLevel();
+
+	this->mFont.loadFromFile("Resources/Fonts/Anton-Regular.ttf");
 }
 
 Level_Two::~Level_Two() = default;
@@ -70,9 +72,19 @@ void Level_Two::collision(const float& deltaTime)
 			this->mExplosionTimer.restart(sf::seconds(0.3F));
 
 			this->mPlayerPlane.removeProjectile(i);
+
+			mTextTags.push_back(new TextTags(&this->mFont, "BOOM!!!", sf::Vector2f(this->mSoldier.getPosition().x, this->mSoldier.getPosition().y), sf::Vector2f(1.F, 2.F), sf::Color::Green,
+				30U));
+
+			this->mTextTagTimer.restart(sf::seconds(0.5F));
 		}
 	}
 
 	if (this->mExplosionTimer.isExpired())
 		this->mPlayerPlane.setExplosion(false);
+
+	int damage = rand() % 2;
+
+	if (pCollision.playerEnemyCollision(this->mPlayerPlane.getExplosionSprite(), this->mSoldier.getSoldierSprite(), deltaTime))
+		this->mSoldier.takeDamage(damage);
 }

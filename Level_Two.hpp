@@ -2,6 +2,7 @@
 #include <Level/Level.hpp>
 #include <stack>
 #include <Entity/Enemies/Soldier/EnemySoldier.hpp>
+#include <Resources/TextTags.hpp>
 
 class Level_Two :
 	public Level
@@ -23,4 +24,9 @@ private:
 	EnemySoldier mSoldier;
 
 	thor::Timer mExplosionTimer;
+	thor::Timer mTextTagTimer;
+
+	std::vector<TextTags*> mTextTags;
+
+	sf::Font mFont;
 };
