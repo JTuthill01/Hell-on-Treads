@@ -6,17 +6,19 @@ class Enemy : Entity
 {
 public:
 	Enemy();
-	Enemy(std::vector<sf::Texture>& textures, std::vector<sf::Texture>& bulletTextures, sf::Vector2u windowBounds, sf::Vector2f position, sf::Vector2f moveDirection, int type);
+	Enemy(std::vector<sf::Texture>& textures, sf::Vector2f position, sf::Vector2f moveDirection, int type);
 	~Enemy();
 
 	const int enemyDealDamage() const;
 	void removeEnemyTankProjectile(unsigned index);
 	void removeEnemyPlaneProjectile(unsigned index);
 	void takeDamage(int damage);
+	void renderPlane(sf::RenderTarget& target);
 	void render(sf::RenderTarget& target);
 	void update(const float& deltaTime);
 	void move(const float direction_x, const float direction_y, const float& deltaTime);
 	void updateAnimations(const float& deltaTime);
+	void updatePlane(const float& deltaTime);
 
 	//Getters
 	Projectile& getEnemyTankProjectile(unsigned index);
@@ -31,6 +33,7 @@ public:
 
 	//Enemy plane getter(s)
 	Projectile& getEnemyPlaneProjectile(unsigned index);
+	inline const int getEnemyPlaneProjectileSize() { return this->mEnemyPlaneProjectile.size(); }
 	inline sf::Sprite& getEnemyPlaneSprite() { return this->mEnemyPlaneSprites; }
 	inline sf::FloatRect getEnemyGobalBounds()const { return this->mEnemyPlaneSprites.getGlobalBounds(); }
 	inline sf::Vector2f getEnemyPlanePosition() { return this->mEnemyPlaneSprites.getPosition(); }

@@ -34,11 +34,11 @@ Enemy::Enemy() : mShootTimer(mShootTimerMax), mShootTimerMax(50.F), mIsAlive(tru
 	this->mDamage = 2;
 }
 
-Enemy::Enemy(std::vector<sf::Texture>& textures, std::vector<sf::Texture>& bulletTextures, sf::Vector2u windowBounds, sf::Vector2f position, sf::Vector2f moveDirection, int type)
+Enemy::Enemy(std::vector<sf::Texture>& textures, sf::Vector2f position, sf::Vector2f moveDirection, int type)
 {
-	this->mTextures = &textures;
+	this->pEnemyPlaneShootTimer.restart(sf::seconds(0.8F));
 
-	this->mEnemyProjectiles = &bulletTextures;
+	this->mTextures = &textures;
 
 	this->mPosition = position;
 
@@ -46,11 +46,14 @@ Enemy::Enemy(std::vector<sf::Texture>& textures, std::vector<sf::Texture>& bulle
 
 	this->mEnemyPlaneType = type;
 
-	this->mWindowBounds = windowBounds;
+	if (this->mEnemyPlaneType >= (this->mTextures)->size())
+		std::cout << "No Textures found" << "\n";
 
 	this->mEnemyPlaneSprites.setTexture((*this->mTextures)[this->mEnemyPlaneType]);
 
-	this->mEnemyPlaneSprites.setPosition(windowBounds.x, (rand() % windowBounds.y) - this->mEnemyPlaneSprites.getGlobalBounds().height);
+	this->mEnemyPlaneSprites.setPosition(position);
+
+	this->mEnemyPlaneSprites.setScale(-1.F, 1.F);
 
 	this->loadPlaneProjectiles();
 }
@@ -114,17 +117,20 @@ void Enemy::takeDamage(int damage)
 	}
 }
 
+void Enemy::renderPlane(sf::RenderTarget & target)
+{
+	target.draw(this->mEnemyPlaneSprites);
+
+	for (size_t i = 0; i < this->mEnemyPlaneProjectile.size(); i++)
+		this->mEnemyPlaneProjectile[i].render(target);
+}
+
 void Enemy::render(sf::RenderTarget & target)
 {
 	target.draw(this->mEnemyTankSprite);
 
-	target.draw(this->mEnemyPlaneSprites);
-
 	if (this->mIsMuzzleOn)
 		this->pMuzzle.render(target);
-
-	for (size_t i = 0; i < this->mEnemyTankProjectile.size(); i++)
-		this->mEnemyTankProjectile[i].render(target);
 }
 
 void Enemy::update(const float& deltaTime)
@@ -137,8 +143,6 @@ void Enemy::update(const float& deltaTime)
 
 	this->updateAttack(deltaTime);
 
-	this->mEnemyPlaneSprites.move(-0.8F, 0.F);
-
 	if (!this->pIsFrozen)
 		this->mEnemyTankSprite.move(sf::Vector2f(-0.6F, 0.F));
 
@@ -147,9 +151,6 @@ void Enemy::update(const float& deltaTime)
 
 	for (size_t i = 0; i < this->mEnemyTankProjectile.size(); i++)
 		this->mEnemyTankProjectile[i].update(deltaTime);
-
-	for (size_t i = 0; i < this->mEnemyPlaneProjectile.size(); i++)
-		this->mEnemyPlaneProjectile[i].update(deltaTime);
 }
 
 void Enemy::move(const float direction_x, const float direction_y, const float& deltaTime)
@@ -205,18 +206,33 @@ void Enemy::updateAnimations(const float& deltaTime)
 	this->enemyDead(deltaTime);
 }
 
+void Enemy::updatePlane(const float& deltaTime)
+{
+	this->mEnemyPlaneSprites.move(-0.9F, 0.F);
+
+	if (pEnemyPlaneShootTimer.isExpired())
+	{
+		this->enemyPlaneAttack();
+
+		this->pEnemyPlaneShootTimer.restart(sf::seconds(2.5F));
+	}
+
+	for (size_t i = 0; i < this->mEnemyPlaneProjectile.size(); i++)
+		this->mEnemyPlaneProjectile[i].update(deltaTime);
+}
+
 void Enemy::enemyPlaneAttack()
 {
 	if (this->mEnemyPlaneType == PLANE)
-		this->mEnemyPlaneProjectile.push_back(Projectile(&Enemy::mEnemyPlaneWeapons[PLANE_MISSILE], this->mEnemyPlaneSprites.getPosition().x - 200,
+		this->mEnemyPlaneProjectile.push_back(Projectile(&Enemy::mEnemyPlaneWeapons[PLANE_MISSILE], this->mEnemyPlaneSprites.getPosition().x - 100,
 			this->mEnemyPlaneSprites.getPosition().y + 100, sf::Vector2f(-0.1F, 0.1F), sf::Vector2f(-1.F, 0.F)));
 
 	else if (this->mEnemyPlaneType == BOMBER)
 	{
 		Projectile mTempProjectiles;
 
-		mTempProjectiles.createBomb(&Enemy::mEnemyPlaneWeapons[PLANE_BOMB], sf::Vector2f(this->mEnemyPlaneSprites.getPosition().x - 150,
-			this->mEnemyPlaneSprites.getPosition().y + 200), sf::Vector2f(-0.2F, 0.2F), sf::Vector2f(-1.F, 0.F));
+		mTempProjectiles.createBomb(&Enemy::mEnemyPlaneWeapons[PLANE_BOMB], sf::Vector2f(this->mEnemyPlaneSprites.getPosition().x,
+			this->mEnemyPlaneSprites.getPosition().y), sf::Vector2f(-0.2F, 0.2F), sf::Vector2f(-1.F, 0.F));
 
 		this->mEnemyPlaneProjectile.push_back(mTempProjectiles);
 	}
