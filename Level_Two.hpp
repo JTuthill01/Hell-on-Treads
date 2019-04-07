@@ -1,6 +1,7 @@
 #pragma once
 #include <Level/Level.hpp>
 #include <stack>
+#include <Entity/Enemies/Enemy.hpp>
 #include <Entity/Enemies/Soldier/EnemySoldier.hpp>
 #include <Resources/TextTags.hpp>
 
@@ -20,8 +21,15 @@ public:
 	void collision(const float& deltaTime);
 
 private:
-	Plane mPlayerPlane;
+	void loadEnemyPlane();
+	void loadEnemyPlaneProjectiles();
+
+	std::vector<sf::Texture> mEnemyPlaneProjectilesTextures;
+	std::vector<sf::Texture> mEnemyPlaneTextures;
+	std::vector<Enemy> mEnemyPlane;
 	EnemySoldier mSoldier;
+
+	Plane mPlayerPlane;
 
 	thor::Timer mExplosionTimer;
 	thor::Timer mTextTagTimer;
