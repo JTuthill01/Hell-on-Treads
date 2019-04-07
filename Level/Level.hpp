@@ -1,10 +1,11 @@
 #pragma once
 #include <Resources/Particle.hpp>
 #include <Entity/Player/Player.hpp>
-#include <Entity/Enemies/EnemyTank.hpp>
+#include <Entity/Enemies/Enemy.hpp>
 #include <Collision/Collision.hpp>
 #include <Resources/AuroraLoader.hpp>
-#include <Entity/Player/Player_Plane/Player_Plane.hpp>
+#include <Entity/Plane/Plane.hpp>
+#include <Resources/TextTags.hpp>
 
 class Level
 {
@@ -17,6 +18,7 @@ public:
 	virtual void initLevel() = 0;
 
 protected:
+	void removeEnemyPlane(unsigned index);
 	void playerProjectileCollision(const float& deltaTime);
 	void enemyProjectileCollision(const float& deltaTime);
 	void playerInput(const float& deltaTime);
@@ -30,12 +32,18 @@ protected:
 	sf::Sprite pBackgroundSprite;
 	sf::Sprite mExpolsionSprite;
 	sf::RenderWindow* pWindow;
+	sf::Font pFont;
+
+	//Timers
+	thor::Timer pEnemySpawnTimer;
+	thor::Timer pTextTagTimer;
 
 	Player pPlayer;
 	std::vector<Player> player;
 
-	EnemyTank pEnemeyTank;
-	std::vector<EnemyTank> enemyTank;
+	Enemy pEnemyTank;
+	std::vector<Enemy> enemyTank;
+	std::vector<Enemy> mEnemyPlane;
 
 	Entity pEntity;
 	Collision pCollision;
@@ -46,6 +54,8 @@ protected:
 
 	bool pLoadLevel;
 	bool pHasExploaded;
+
+	std::vector<TextTags> pTextTags;
 
 private:
 	thor::Timer mExplosionTimer;

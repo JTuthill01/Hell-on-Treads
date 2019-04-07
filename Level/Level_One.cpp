@@ -8,6 +8,12 @@ Level_One::Level_One(sf::RenderWindow* window, std::stack<Level*>* level) : Leve
 
 Level_One::~Level_One()
 {
+	while (!this->pLevel->empty())
+	{
+		delete this->pLevel->top();
+
+		this->pLevel->pop();
+	}
 }
 
 void Level_One::update(const float& deltaTime)
@@ -34,9 +40,13 @@ void Level_One::render(sf::RenderTarget& target)
 
 	this->pPlayer.render(target);
 
-	this->pEnemeyTank.render(target);
+	this->pEnemyTank.render(target);
 
 	this->mAurora.render(target);
+
+	if (this->pTextTagTimer.isRunning())
+		for (size_t i = 0; i < this->pTextTags.size(); i++)
+			this->pTextTags[i].render(target);
 }
 
 void Level_One::initLevel()
