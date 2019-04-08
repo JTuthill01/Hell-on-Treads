@@ -7,17 +7,22 @@ Level_Two::Level_Two(sf::RenderWindow* window, std::stack<Level*>* level) : Leve
 
 	this->mFont.loadFromFile("Resources/Fonts/Anton-Regular.ttf");
 
-	this->pEnemySpawnTimer.restart(sf::seconds(0.4F));
-
 	this->loadEnemyPlane();
 
-	this->loadEnemyPlaneProjectiles();
+	this->pEnemySpawnTimer.restart(sf::seconds(0.2F));
 }
 
 Level_Two::~Level_Two() = default;
 
 void Level_Two::update(const float& deltaTime)
 {
+	if (this->pEnemySpawnTimer.isExpired())
+	{
+		this->pEnemyPlane.push_back(Enemy(this->mEnemyPlaneTextures, sf::Vector2f(1700.F, (rand() % pWindow->getSize().y) - 50), sf::Vector2f(-0.8F, 0.F), PLANE));
+
+		this->pEnemySpawnTimer.restart(sf::seconds(8.4F));
+	}
+
 	this->updateLevel(deltaTime);
 
 	this->mPlayerPlane.update(deltaTime);
@@ -28,11 +33,14 @@ void Level_Two::update(const float& deltaTime)
 
 	this->collision(deltaTime);
 
-	/*if (this->pEnemySpawnTimer.isExpired())*/
-	this->mEnemyPlane.push_back(Enemy(this->mEnemyPlaneTextures, this->mEnemyPlaneProjectilesTextures, pWindow->getSize(), sf::Vector2f(0.F, 0.F), sf::Vector2f(-0.7F, 0.F), PLANE));
+	for (size_t i = 0; i < this->pEnemyPlane.size(); i++)
+		this->pEnemyPlane[i].updatePlane(deltaTime);
 
-	for (size_t i = 0; i < this->mEnemyPlane.size(); i++)
-		this->mEnemyPlane[i].update(deltaTime);
+	for (size_t i = 0; i < this->pEnemyPlane.size(); i++)
+		if (this->pEnemyPlane[i].getEnemyPlanePosition().x < 0)
+			this->removeEnemyPlane(i);
+
+	this->removeProjectile();
 }
 
 void Level_Two::render(sf::RenderTarget & target)
@@ -43,8 +51,8 @@ void Level_Two::render(sf::RenderTarget & target)
 
 	this->mSoldier.render(target);
 
-	for (size_t i = 0; i < this->mEnemyPlane.size(); i++)
-		this->mEnemyPlane[i].render(target);
+	for (size_t i = 0; i < this->pEnemyPlane.size(); i++)
+		this->pEnemyPlane[i].renderPlane(target);
 
 	if (this->mTextTagTimer.isRunning())
 		for (size_t i = 0; i < this->mTextTags.size(); i++)
@@ -82,7 +90,7 @@ void Level_Two::collision(const float& deltaTime)
 
 	for (int i = 0; i < this->mPlayerPlane.getProjectileSize(); i++)
 	{
-		if (pCollision.playerEnemyCollision(this->mPlayerPlane.getProjectile(i).getBombSprite(), this->mSoldier.getSoldierSprite(), deltaTime))
+		if (this->pCollision.playerEnemyCollision(this->mPlayerPlane.getProjectile(i).getBombSprite(), this->mSoldier.getSoldierSprite(), deltaTime))
 		{
 			this->mPlayerPlane.setExplosionPosition(sf::Vector2f(this->mSoldier.getPosition().x - 250, this->mSoldier.getPosition().y - 200));
 
@@ -90,20 +98,61 @@ void Level_Two::collision(const float& deltaTime)
 
 			this->mExplosionTimer.restart(sf::seconds(0.3F));
 
-			this->mPlayerPlane.removeProjectile(i);
-
-			mTextTags.push_back(new TextTags(&this->mFont, "BOOM!!!", sf::Vector2f(this->mSoldier.getPosition().x + 100, this->mSoldier.getPosition().y - 150), sf::Vector2f(1.F, 2.F), sf::Color::Green,
+			this->mTextTags.push_back(new TextTags(&this->mFont, "BOOM!!!", sf::Vector2f(this->mSoldier.getPosition().x + 100, this->mSoldier.getPosition().y - 150), sf::Vector2f(1.F, 2.F), sf::Color::Green,
 				30U));
 
 			this->mTextTagTimer.restart(sf::seconds(0.4F));
 
 			int damage = this->mPlayerPlane.weaponDamage();
 
-			if (mSoldier.getHp() > 0)
+			if (this->mSoldier.getHp() > 0)
 				this->mSoldier.takeDamage(damage);
 
-			mTextTags.push_back(new TextTags(&this->mFont, " - " + std::to_string(damage), sf::Vector2f(this->mSoldier.getPosition().x + 100, this->mSoldier.getPosition().y - 250), sf::Vector2f(1.F, 2.F), sf::Color::Green,
+			this->mTextTags.push_back(new TextTags(&this->mFont, " - " + std::to_string(damage), sf::Vector2f(this->mSoldier.getPosition().x + 100, this->mSoldier.getPosition().y - 250), sf::Vector2f(1.F, 2.F), sf::Color::Green,
 				30U));
+		}
+	}
+
+	for (int i = 0; i < this->mPlayerPlane.getProjectileSize(); i++)
+	{
+		this->mPlayerPlane.getProjectile(i).update(deltaTime);
+
+		for (size_t j = 0; j < this->pEnemyPlane.size(); j++)
+		{
+			if (this->pCollision.playerEnemyCollision(this->mPlayerPlane.getProjectile(i).getProjectileSprite(), this->pEnemyPlane[j].getEnemyPlaneSprite(), deltaTime))
+			{
+				this->mPlayerPlane.setExplosionPosition(sf::Vector2f(this->pEnemyPlane[j].getEnemyPlanePosition().x - 550, this->pEnemyPlane[j].getEnemyPlanePosition().y - 200));
+
+				this->mPlayerPlane.setExplosion(true);
+
+				this->mExplosionTimer.restart(sf::seconds(0.3F));
+
+				int damage = this->mPlayerPlane.weaponDamage();
+
+				if (this->pEnemyPlane[j].getPlaneHp() > 0)
+				{
+					this->pEnemyPlane[j].planeTakeDamage(damage);
+
+					if (this->pEnemyPlane[j].getPlaneHp() == 0)
+						this->removeEnemyPlane(j);
+				}
+			}
+		}
+	}
+
+	for (size_t i = 0; i < this->pEnemyPlane.size(); i++)
+	{
+		for (int j = 0; j < this->pEnemyPlane[i].getEnemyPlaneProjectileSize(); j++)
+		{
+			if (this->pCollision.playerEnemyCollision(this->pEnemyPlane[i].getEnemyPlaneProjectile(j).getMissileSprite(), this->mPlayerPlane.getPlaneSprite(), deltaTime))
+			{
+				int damage = this->pEnemyPlane[i].enemyPlaneDealDamage();
+
+				if (this->mPlayerPlane.getPlayerHp() > 0)
+					this->mPlayerPlane.playerTakeDamage(damage);
+
+				this->pEnemyPlane[i].removeEnemyPlaneProjectile(j);
+			}
 		}
 	}
 
@@ -112,7 +161,7 @@ void Level_Two::collision(const float& deltaTime)
 
 	int damage = rand() % 2;
 
-	if (pCollision.playerEnemyCollision(this->mPlayerPlane.getExplosionSprite(), this->mSoldier.getSoldierSprite(), deltaTime))
+	if (this->pCollision.playerEnemyCollision(this->mPlayerPlane.getExplosionSprite(), this->mSoldier.getSoldierSprite(), deltaTime))
 		this->mSoldier.takeDamage(damage);
 
 	if (this->mTextTagTimer.isExpired() && !this->mTextTags.empty())
@@ -122,18 +171,25 @@ void Level_Two::collision(const float& deltaTime)
 void Level_Two::loadEnemyPlane()
 {
 	sf::Texture temp;
-	if (!temp.loadFromFile("Resources/Textures/Enemy/Fokker.png"))
-		std::cerr << "No texture for plane found" << "\n";
-
+	temp.loadFromFile("Resources/Textures/Enemy/Fokker.png");
 	this->mEnemyPlaneTextures.push_back(temp);
 
-	this->pEnemySpawnTimer.restart(sf::seconds(0.4F));
+	temp.loadFromFile("Resources/Textures/Enemy/AEG_CIV_default.png");
+	this->mEnemyPlaneTextures.push_back(temp);
 }
 
 void Level_Two::loadEnemyPlaneProjectiles()
 {
 	sf::Texture temp;
-	if (!temp.loadFromFile("Resources/Textures/Bullets/missile(2).png"))
-		std::cerr << "No projectile texture found" << "\n";
+	temp.loadFromFile("Resources/Textures/Bullets/Missile(2).png");
 	this->mEnemyPlaneProjectilesTextures.push_back(temp);
+}
+
+void Level_Two::removeProjectile()
+{
+	for (int i = 0; i < this->mPlayerPlane.getProjectileSize(); i++)
+		if (this->pIsRemoved)
+			this->mPlayerPlane.removeProjectile(i);
+
+	this->pIsRemoved = false;
 }
