@@ -10,10 +10,16 @@ public:
 	~Enemy();
 
 	const int enemyDealDamage() const;
+	const int enemyPlaneDealDamage() const;
+
+	void createTanks(std::vector<sf::Texture>& textures, sf::Vector2f position, sf::Vector2f moveDirection, int type);
 	void removeEnemyTankProjectile(unsigned index);
 	void removeEnemyPlaneProjectile(unsigned index);
 	void takeDamage(int damage);
+	void planeTakeDamage(int damage);
 	void renderPlane(sf::RenderTarget& target);
+	void renderTank(sf::RenderTarget& target);
+	void updateTank(const float& deltaTime);
 	void render(sf::RenderTarget& target);
 	void update(const float& deltaTime);
 	void move(const float direction_x, const float direction_y, const float& deltaTime);
@@ -21,6 +27,7 @@ public:
 	void updatePlane(const float& deltaTime);
 
 	//Getters
+	const std::vector<Projectile>& getProjectiles();
 	Projectile& getEnemyTankProjectile(unsigned index);
 	inline int getHp() { return this->mHp; }
 	inline int getEnemyType() { return this->mEnemyType; }
@@ -37,6 +44,8 @@ public:
 	inline sf::Sprite& getEnemyPlaneSprite() { return this->mEnemyPlaneSprites; }
 	inline sf::FloatRect getEnemyGobalBounds()const { return this->mEnemyPlaneSprites.getGlobalBounds(); }
 	inline sf::Vector2f getEnemyPlanePosition() { return this->mEnemyPlaneSprites.getPosition(); }
+	inline int getPlaneHp() { return this->mPlaneHp; }
+	inline const bool isPlaneAlive() { return this->mIsPlaneAlive; }
 
 	static std::vector<sf::Texture> mEnemyPlaneWeapons;
 	static std::vector<sf::Texture> mEnemyProjectileTextures;
@@ -48,12 +57,18 @@ private:
 	int mHpMax;
 	int mDamage;
 	int mDamageMax;
+	int mPlaneHp;
+	int mPlaneHpMax;
+	int mPlaneDamage;
+	int mPlaneDamageMax;
 	int mEnemyPlaneType;
+	int mEnemyTankType;
 
 	bool mIsAlive;
 	bool mIsAttacking;
 	bool mIsFiring;
 	bool mIsMuzzleOn;
+	bool mIsPlaneAlive;
 
 	float mShootTimerMax;
 	float mShootTimer;
@@ -74,11 +89,19 @@ private:
 	void loadProjectile();
 	void updateAttack(const float& deltaTime);
 
+	//Plane
 	sf::Sprite mEnemyPlaneSprites;
 	sf::Vector2u mWindowBounds;
 	std::vector<sf::Texture>* mTextures;
 	std::vector<sf::Texture>* mEnemyProjectiles;
 	std::vector<Projectile> mEnemyPlaneProjectile;
+
+	//Tank
+	sf::Sprite mEnemyTankSprites;
+	std::vector<sf::Texture>* mTankTextures;
+	std::vector<Projectile> mEnemyTankProjectiles;
+
+	//Turret
 
 	//Hp Bars
 	sf::RectangleShape mHpBar1;

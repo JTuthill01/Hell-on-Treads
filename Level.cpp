@@ -3,7 +3,7 @@
 
 std::vector<sf::Texture> Level::pParticleTextures;
 
-Level::Level(sf::RenderWindow* window, std::stack<Level*>* level) : pWindow(window), pLevel(level), pLoadLevel(false), pHasExploaded(false)
+Level::Level(sf::RenderWindow* window, std::stack<Level*>* level) : pWindow(window), pLevel(level), pLoadLevel(false), pHasExploaded(false), pIsRemoved(false)
 {
 	this->pFont.loadFromFile("Resources/Fonts/Anton-Regular.ttf");
 }
@@ -18,33 +18,34 @@ Level::~Level()
 	}
 }
 
+void Level::removeEnemyPlane(unsigned index)
+{
+	this->pEnemyPlane.erase(this->pEnemyPlane.begin() + index);
+}
+
 void Level::playerProjectileCollision(const float& deltaTime)
 {
-	if (this->pCollision.playerProjectileCollision(this->pPlayer, this->pEnemeyTank.getEnemyTankSprite(), deltaTime))
+	if (this->pCollision.playerProjectileCollision(this->pPlayer, this->pEnemyTank.getEnemyTankSprite(), deltaTime))
 	{
-		this->setExplosions(sf::Vector2f(this->pEnemeyTank.getEnemyTankPosition().x, this->pEnemeyTank.getEnemyTankPosition().y), sf::Vector2f(2.F, 2.F));
+		this->setExplosions(sf::Vector2f(this->pEnemyTank.getEnemyTankPosition().x, this->pEnemyTank.getEnemyTankPosition().y), sf::Vector2f(2.F, 2.F));
 
 		this->mAurora.setAurora(deltaTime);
 
-		this->mAurora.setAuroraPosition(sf::Vector2f(this->pEnemeyTank.getEnemyTankPosition().x, this->pEnemeyTank.getEnemyTankPosition().y + 100));
+		this->mAurora.setAuroraPosition(sf::Vector2f(this->pEnemyTank.getEnemyTankPosition().x, this->pEnemyTank.getEnemyTankPosition().y + 100));
 
 		int damage = this->pPlayer.playerDealDamage();
 
-		if (this->pEnemeyTank.getHp() > 0)
-			this->pEnemeyTank.takeDamage(damage);
+		if (this->pEnemyTank.getHp() > 0)
+			this->pEnemyTank.takeDamage(damage);
 
-		this->pTextTags.push_back(TextTags(&this->pFont, "BOOM!!!!", sf::Vector2f(this->pEnemeyTank.getEnemyTankPosition().x + 100, this->pEnemeyTank.getEnemyTankPosition().y), sf::Vector2f(1.F, 2.F), sf::Color::Yellow,
+		this->pTextTags.push_back(TextTags(&this->pFont, "BOOM!!!!", sf::Vector2f(this->pEnemyTank.getEnemyTankPosition().x + 100, this->pEnemyTank.getEnemyTankPosition().y + 100), sf::Vector2f(2.F, 2.F), sf::Color::Yellow,
+			40U));
+
+		this->pTextTags.push_back(TextTags(&this->pFont, "- " + std::to_string(damage), sf::Vector2f(this->pEnemyTank.getEnemyTankPosition().x + 100, this->pEnemyTank.getEnemyTankPosition().y), sf::Vector2f(1.F, 1.F), sf::Color::Yellow,
 			40U));
 	}
 
-	if (this->pCollision.enemyProjectileCollision(this->pEnemeyTank, this->pPlayer.getPlayerSprite(), deltaTime))
-	{
-		this->mAurora.setEnemyAurora(deltaTime);
-
-		this->mAurora.setEnemyAuroraPosition(sf::Vector2f(this->pPlayer.getPosition().x - 150, this->pPlayer.getPosition().y));
-	}
-
-	if (!this->mExplosionTimer.isExpired())
+	if (this->mExplosionTimer.isRunning())
 		this->pHasExploaded = true;
 
 	else if (this->mExplosionTimer.isExpired())
@@ -56,14 +57,24 @@ void Level::playerProjectileCollision(const float& deltaTime)
 
 void Level::enemyProjectileCollision(const float& deltaTime)
 {
-	if (this->pCollision.enemyProjectileCollision(this->pEnemeyTank, this->pPlayer.getPlayerSprite(), deltaTime))
+	if (this->pCollision.enemyProjectileCollision(this->pEnemyTank, this->pPlayer.getPlayerSprite(), deltaTime))
 	{
+		this->mAurora.setEnemyAurora(deltaTime);
+
+		this->mAurora.setEnemyAuroraPosition(sf::Vector2f(this->pPlayer.getPosition().x - 150, this->pPlayer.getPosition().y));
+
 		this->setExplosions(sf::Vector2f(this->pPlayer.getPlayerSprite().getPosition().x, this->pPlayer.getPlayerSprite().getPosition().y), sf::Vector2f(2.F, 2.F));
 
-		this->pTextTags.push_back(TextTags(&this->pFont, "BOOM!!!!", sf::Vector2f(this->pEnemeyTank.getEnemyTankPosition().x + 100, this->pEnemeyTank.getEnemyTankPosition().y), sf::Vector2f(1.F, 2.F), sf::Color::Yellow,
+		int damage = this->pEnemyTank.enemyDealDamage();
+
+		if (this->pPlayer.getPlayerHp() > 0)
+			this->pPlayer.takeDamage(damage);
+
+		this->pTextTags.push_back(TextTags(&this->pFont, "BOOM!!!!", sf::Vector2f(this->pPlayer.getPosition().x + 100, this->pPlayer.getPosition().y), sf::Vector2f(1.F, 2.F), sf::Color::Yellow,
 			40U));
 
-		std::cout << "..." << "\n";
+		this->pTextTags.push_back(TextTags(&this->pFont, "- " + std::to_string(damage), sf::Vector2f(this->pPlayer.getPosition().x + 100, this->pPlayer.getPosition().y + 50), sf::Vector2f(1.F, 2.F), sf::Color(178, 34, 34, 240),
+			40U));
 	}
 
 	if (this->mExplosionTimer.isRunning())
@@ -71,15 +82,9 @@ void Level::enemyProjectileCollision(const float& deltaTime)
 
 	else if (this->mExplosionTimer.isExpired())
 		this->pHasExploaded = false;
-}
 
-void Level::playerInput(const float& deltaTime)
-{
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-		this->pPlayer.move(0.45F, 0.F, deltaTime);
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-		this->pPlayer.move(-0.8F, 0.F, deltaTime);
+	if (this->pTextTagTimer.isExpired() && !this->pTextTags.empty())
+		this->pTextTags.pop_back();
 }
 
 void Level::updateLevel(const float& deltaTime)
@@ -89,9 +94,7 @@ void Level::updateLevel(const float& deltaTime)
 
 	this->pPlayer.update(deltaTime);
 
-	this->playerInput(deltaTime);
-
-	this->pEnemeyTank.update(deltaTime);
+	this->pEnemyTank.update(deltaTime);
 
 	this->playerProjectileCollision(deltaTime);
 
@@ -99,13 +102,13 @@ void Level::updateLevel(const float& deltaTime)
 
 	this->pCollision.removePlayerProjectile(this->pPlayer, this->pWindow, deltaTime);
 
-	this->pCollision.removeEnemyProjectile(this->pWindow, this->pEnemeyTank, deltaTime);
+	this->pCollision.removeEnemyProjectile(this->pWindow, this->pEnemyTank, deltaTime);
 
-	this->pCollision.playerEnemyCollision(this->pPlayer.getPlayerSprite(), this->pEnemeyTank.getEnemyTankSprite(), deltaTime);
+	this->pCollision.playerEnemyCollision(this->pPlayer.getPlayerSprite(), this->pEnemyTank.getEnemyTankSprite(), deltaTime);
 
-	this->pCollision.playerProjectileCollision(this->pPlayer, this->pEnemeyTank.getEnemyTankSprite(), deltaTime);
+	this->pCollision.playerProjectileCollision(this->pPlayer, this->pEnemyTank.getEnemyTankSprite(), deltaTime);
 
-	this->pCollision.enemyProjectileCollision(this->pEnemeyTank, this->pPlayer.getPlayerSprite(), deltaTime);
+	this->pCollision.enemyProjectileCollision(this->pEnemyTank, this->pPlayer.getPlayerSprite(), deltaTime);
 }
 
 void Level::setExplosions(sf::Vector2f position, sf::Vector2f scale)
@@ -122,7 +125,7 @@ void Level::setExplosions(sf::Vector2f position, sf::Vector2f scale)
 
 void Level::timer()
 {
-	this->pTextTagTimer.restart(sf::seconds(1.F));
+	this->pTextTagTimer.restart(sf::seconds(0.2F));
 
 	this->mExplosionTimer.reset(sf::seconds(0.3F));
 	this->mExplosionTimer.start();

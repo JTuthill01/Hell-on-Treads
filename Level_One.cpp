@@ -40,15 +40,13 @@ void Level_One::render(sf::RenderTarget& target)
 
 	this->pPlayer.render(target);
 
-	this->pEnemeyTank.render(target);
+	this->pEnemyTank.render(target);
 
 	this->mAurora.render(target);
 
 	if (this->pTextTagTimer.isRunning())
-	{
-		for (int i = 0; i < this->pTextTags.size(); i++)
+		for (size_t i = 0; i < this->pTextTags.size(); i++)
 			this->pTextTags[i].render(target);
-	}
 }
 
 void Level_One::initLevel()
@@ -59,6 +57,23 @@ void Level_One::initLevel()
 	this->mLevelOneSprite.setTexture(this->mLevelOneTexture);
 }
 
-void Level_One::projectileCollision(const float& deltaTime)
+void Level_One::loadTank()
+{
+	sf::Texture temp;
+	temp.loadFromFile("Resources/Textures/Enemy/TankCombined.png");
+
+	this->mEnemyTankTextures.push_back(temp);
+}
+
+void Level_One::playerInput(const float& deltaTime)
+{
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		this->pPlayer.move(0.45F, 0.F, deltaTime);
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		this->pPlayer.move(-0.8F, 0.F, deltaTime);
+}
+
+void Level_One::removeProjectile()
 {
 }

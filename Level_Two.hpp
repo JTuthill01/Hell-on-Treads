@@ -26,8 +26,8 @@ private:
 
 	std::vector<sf::Texture> mEnemyPlaneProjectilesTextures;
 	std::vector<sf::Texture> mEnemyPlaneTextures;
-	std::vector<Enemy> mEnemyPlane;
 	EnemySoldier mSoldier;
+	std::vector<EnemySoldier> mEnemySolider;
 
 	Plane mPlayerPlane;
 
@@ -37,4 +37,7 @@ private:
 	std::vector<TextTags*> mTextTags;
 
 	sf::Font mFont;
+
+	// Inherited via Level
+	virtual void removeProjectile() override;
 };

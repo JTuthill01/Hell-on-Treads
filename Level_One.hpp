@@ -1,6 +1,6 @@
 #pragma once
 #include <Entity/Player/Player.hpp>
-#include <Entity/Enemies/EnemyTank.hpp>
+#include <Entity/Enemies/Enemy.hpp>
 #include "Level.hpp"
 #include "Level_Two.hpp"
 
@@ -16,11 +16,19 @@ public:
 	virtual void render(sf::RenderTarget& target) override;
 	virtual void initLevel() override;
 
-	void projectileCollision(const float& deltaTime);
-
 private:
+	void loadTank();
+	void playerInput(const float& deltaTime);
+
 	sf::Texture mLevelOneTexture;
 	sf::Sprite mLevelOneSprite;
 
-	EnemyTank enemies;
+	std::vector<sf::Texture> mEnemyTankTextures;
+	std::vector<sf::Texture> mEnemyTankProjectiles;
+	std::vector<Enemy> mEnemyTank;
+
+	Enemy enemies;
+
+	// Inherited via Level
+	virtual void removeProjectile() override;
 };

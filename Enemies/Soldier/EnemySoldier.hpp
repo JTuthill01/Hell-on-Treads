@@ -7,6 +7,7 @@ public:
 	EnemySoldier();
 	~EnemySoldier();
 
+	void loadSprite();
 	void update(const float& deltaTime);
 	void render(sf::RenderTarget& target);
 	void move(const float direction_x, const float direction_y, const float& deltaTime);
@@ -20,6 +21,8 @@ public:
 private:
 	sf::Texture mEnemySoldierTexture;
 	sf::Sprite mEnemySoldierSprite;
+
+	sf::Texture mTexture;
 
 	void load();
 	void createMovementComponent(const float max_velocity,

@@ -45,6 +45,11 @@ void EnemySoldier::takeDamage(int damage)
 	}
 }
 
+void EnemySoldier::loadSprite()
+{
+	this->mTexture.loadFromFile("Resources/Textures/Enemy/EnemySolider.png");
+}
+
 void EnemySoldier::load()
 {
 	if (!this->mEnemySoldierTexture.loadFromFile("Resources/Textures/Enemy/EnemySolider.png"))

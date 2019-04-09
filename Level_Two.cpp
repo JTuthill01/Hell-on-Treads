@@ -134,7 +134,11 @@ void Level_Two::collision(const float& deltaTime)
 					this->pEnemyPlane[j].planeTakeDamage(damage);
 
 					if (this->pEnemyPlane[j].getPlaneHp() == 0)
+					{
 						this->removeEnemyPlane(j);
+
+						this->pIsRemoved = true;
+					}
 				}
 			}
 		}
@@ -149,9 +153,11 @@ void Level_Two::collision(const float& deltaTime)
 				int damage = this->pEnemyPlane[i].enemyPlaneDealDamage();
 
 				if (this->mPlayerPlane.getPlayerHp() > 0)
+				{
 					this->mPlayerPlane.playerTakeDamage(damage);
 
-				this->pEnemyPlane[i].removeEnemyPlaneProjectile(j);
+					this->pIsRemoved = true;
+				}
 			}
 		}
 	}
@@ -188,8 +194,12 @@ void Level_Two::loadEnemyPlaneProjectiles()
 void Level_Two::removeProjectile()
 {
 	for (int i = 0; i < this->mPlayerPlane.getProjectileSize(); i++)
+	{
 		if (this->pIsRemoved)
+		{
 			this->mPlayerPlane.removeProjectile(i);
 
-	this->pIsRemoved = false;
+			this->pIsRemoved = false;
+		}
+	}
 }
