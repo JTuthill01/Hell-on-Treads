@@ -3,24 +3,36 @@
 
 Level_Two::Level_Two(sf::RenderWindow* window, std::stack<Level*>* level) : Level(window, level)
 {
+	this->pEnemyTank.setAudio(false);
+
 	this->initLevel();
 
 	this->mFont.loadFromFile("Resources/Fonts/Anton-Regular.ttf");
 
 	this->loadEnemyPlane();
 
+	this->loadEnemyPlaneProjectiles();
+
 	this->pEnemySpawnTimer.restart(sf::seconds(0.2F));
 }
 
-Level_Two::~Level_Two() = default;
+Level_Two::~Level_Two()
+{
+	while (!this->pLevel->empty())
+	{
+		delete this->pLevel->top();
+
+		this->pLevel->pop();
+	}
+}
 
 void Level_Two::update(const float& deltaTime)
 {
 	if (this->pEnemySpawnTimer.isExpired())
 	{
-		this->pEnemyPlane.push_back(Enemy(this->mEnemyPlaneTextures, sf::Vector2f(1700.F, (rand() % pWindow->getSize().y) - 50), sf::Vector2f(-0.8F, 0.F), PLANE));
+		this->pEnemyPlane.push_back(Enemy(this->mEnemyPlaneTextures, this->mEnemyPlaneProjectilesTextures, sf::Vector2f(1700.F, (rand() % pWindow->getSize().y) - 50), sf::Vector2f(-0.8F, 0.F), PLANE));
 
-		this->pEnemySpawnTimer.restart(sf::seconds(8.4F));
+		this->pEnemySpawnTimer.restart(sf::seconds(4.F));
 	}
 
 	this->updateLevel(deltaTime);
@@ -88,6 +100,7 @@ void Level_Two::collision(const float& deltaTime)
 		if (this->mPlayerPlane.getProjectile(i).getBombPosition().y > this->pWindow->getSize().y)
 			this->mPlayerPlane.removeProjectile(i);
 
+	//Player Enemy Collisions (Bomb)
 	for (int i = 0; i < this->mPlayerPlane.getProjectileSize(); i++)
 	{
 		if (this->pCollision.playerEnemyCollision(this->mPlayerPlane.getProjectile(i).getBombSprite(), this->mSoldier.getSoldierSprite(), deltaTime))
@@ -96,12 +109,12 @@ void Level_Two::collision(const float& deltaTime)
 
 			this->mPlayerPlane.setExplosion(true);
 
-			this->mExplosionTimer.restart(sf::seconds(0.3F));
+			this->mExplosionTimer.restart(sf::seconds(0.2F));
 
 			this->mTextTags.push_back(new TextTags(&this->mFont, "BOOM!!!", sf::Vector2f(this->mSoldier.getPosition().x + 100, this->mSoldier.getPosition().y - 150), sf::Vector2f(1.F, 2.F), sf::Color::Green,
 				30U));
 
-			this->mTextTagTimer.restart(sf::seconds(0.4F));
+			this->mTextTagTimer.restart(sf::seconds(0.6F));
 
 			int damage = this->mPlayerPlane.weaponDamage();
 
@@ -113,6 +126,39 @@ void Level_Two::collision(const float& deltaTime)
 		}
 	}
 
+	//Player Plane Enemy Plane Bomb Collisions
+	for (int k = 0; k < this->mPlayerPlane.getProjectileSize(); k++)
+	{
+		for (size_t l = 0; l < this->pEnemyPlane.size(); l++)
+		{
+			if (this->pCollision.playerEnemyCollision(this->mPlayerPlane.getProjectile(k).getBombSprite(), this->pEnemyPlane[l].getEnemyPlaneSprite(), deltaTime))
+			{
+				this->mPlayerPlane.setExplosionPosition(sf::Vector2f(this->pEnemyPlane[l].getEnemyPlanePosition().x - 550, this->pEnemyPlane[l].getEnemyPlanePosition().y - 200));
+
+				this->mPlayerPlane.setExplosion(true);
+
+				this->mExplosionTimer.restart(sf::seconds(0.3F));
+
+				int damage = this->mPlayerPlane.weaponDamage();
+
+				if (this->pEnemyPlane[l].getPlaneHp() > 0)
+				{
+					this->pEnemyPlane[l].planeTakeDamage(damage);
+
+					if (this->pEnemyPlane[l].getPlaneHp() == 0)
+					{
+						this->pEnemyPlane[l].getEnemyPlaneSprite().setPosition(0.F, 1000.F);
+
+						this->removeEnemyPlane(l);
+
+						this->pIsRemoved = true;
+					}
+				}
+			}
+		}
+	}
+		
+		//Player Missile Collisons
 	for (int i = 0; i < this->mPlayerPlane.getProjectileSize(); i++)
 	{
 		this->mPlayerPlane.getProjectile(i).update(deltaTime);
@@ -135,6 +181,8 @@ void Level_Two::collision(const float& deltaTime)
 
 					if (this->pEnemyPlane[j].getPlaneHp() == 0)
 					{
+						this->pEnemyPlane[j].getEnemyPlaneSprite().setPosition(0.F, 1000.F);
+
 						this->removeEnemyPlane(j);
 
 						this->pIsRemoved = true;
@@ -144,6 +192,7 @@ void Level_Two::collision(const float& deltaTime)
 		}
 	}
 
+	//Enemy Missile Collisions
 	for (size_t i = 0; i < this->pEnemyPlane.size(); i++)
 	{
 		for (int j = 0; j < this->pEnemyPlane[i].getEnemyPlaneProjectileSize(); j++)
@@ -156,7 +205,11 @@ void Level_Two::collision(const float& deltaTime)
 				{
 					this->mPlayerPlane.playerTakeDamage(damage);
 
+					std::cout << damage << "\n";
+
 					this->pIsRemoved = true;
+
+					return;
 				}
 			}
 		}
