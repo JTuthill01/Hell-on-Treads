@@ -4,7 +4,7 @@ class Weather
 public:
 	Weather();
 	Weather(std::vector<sf::Texture>& texture, sf::Vector2f position);
-	Weather(const Weather&);
+	Weather(const Weather& other);
 	~Weather();
 
 	void render(sf::RenderTarget& target);

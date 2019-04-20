@@ -32,8 +32,24 @@ Weather::Weather(std::vector<sf::Texture>& texture, sf::Vector2f position)
 	mCloudSprite.setColor(sf::Color(184, 134, 11, 255));
 }
 
-Weather::Weather(const Weather&)
+Weather::Weather(const Weather& other)
 {
+	//Particles
+	this->mTexture = other.mTexture;
+	this->mWindow = other.mWindow;
+	this->mTime = other.mTime;
+	this->mClock = other.mClock;
+
+	//Clouds
+	this->mCloudPosition = other.mCloudPosition;
+	this->mCloudsTexture = other.mCloudsTexture;
+	this->mCloudSprite = other.mCloudSprite;
+	this->mClouds = other.mClouds;
+
+	//Thor stuff
+	this->mGradient = other.mGradient;
+	this->mEmitter = other.mEmitter;
+	this->mSystem(std::move(other.mSystem));
 }
 
 
