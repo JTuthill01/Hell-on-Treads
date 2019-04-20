@@ -1,6 +1,7 @@
 #pragma once
 #include <Entity/Player/Player.hpp>
 #include <Entity/Enemies/Enemy.hpp>
+#include <Weather/Weather.hpp>
 #include "Level.hpp"
 #include "Level_Two.hpp"
 
@@ -17,6 +18,7 @@ public:
 	virtual void initLevel() override;
 
 private:
+	void loadClouds();
 	void loadTank();
 	void playerInput(const float& deltaTime);
 
@@ -27,7 +29,11 @@ private:
 	std::vector<sf::Texture> mEnemyTankProjectiles;
 	std::vector<Enemy> mEnemyTank;
 
+	Weather mRain;
 	Enemy enemies;
+
+	std::vector<sf::Texture> mCloudTextures;
+	std::vector<Weather> mClouds;
 
 	// Inherited via Level
 	virtual void removeProjectile() override;
