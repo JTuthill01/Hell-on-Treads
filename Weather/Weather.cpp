@@ -29,6 +29,7 @@ Weather::Weather(std::vector<sf::Texture>& texture, sf::Vector2f position)
 
 	mCloudSprite.setTexture((*mClouds)[0]);
 	mCloudSprite.setPosition(position);
+	mCloudSprite.setColor(sf::Color(184, 134, 11, 255));
 }
 
 Weather::Weather(const Weather&)
@@ -57,8 +58,5 @@ void Weather::update()
 	mSystem.update(mTime);
 }
 
-void Weather::updateClouds(const float& deltaTime)
-{
-	mCloudSprite.move(0.5F, 0.F);
-}
+void Weather::updateClouds(const float& deltaTime) { mCloudSprite.move(0.5F, 0.F); }
 

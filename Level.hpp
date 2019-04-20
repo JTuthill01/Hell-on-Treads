@@ -34,18 +34,24 @@ protected:
 	sf::Sprite mExpolsionSprite;
 	sf::RenderWindow* pWindow;
 	sf::Font pFont;
+	std::vector<sf::Texture> pTextures;
+	std::vector<sf::Texture> pProjectileTextures;
 
 	//Timers
 	thor::Timer pEnemySpawnTimer;
 	thor::Timer pTextTagTimer;
+	thor::Timer pCloudSpawnTimer;
 
 	Player pPlayer;
 	std::vector<Player> player;
 
 	Enemy pEnemyTank;
+	std::vector<Enemy> pEnemyJeep;
 	std::vector<Enemy> pEnemyTanks;
 	std::vector<Enemy> pEnemyPlane;
+	std::vector<Projectile>pJeepProjectiles;
 	std::vector<Projectile> pProjectiles;
+	std::vector<TextTags> pTextTags;
 
 	Entity pEntity;
 	Collision pCollision;
@@ -54,11 +60,11 @@ protected:
 	static std::vector<sf::Texture> pParticleTextures;
 	std::vector<Particle::Particle> pParticle;
 
+	bool pIsEnemyProjectileRemoved;
+	bool pIsBombRemoved;
 	bool pIsRemoved;
 	bool pLoadLevel;
 	bool pHasExploaded;
-
-	std::vector<TextTags> pTextTags;
 
 private:
 	thor::Timer mExplosionTimer;

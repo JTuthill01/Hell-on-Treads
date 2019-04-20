@@ -26,10 +26,15 @@ void Level_One::update(const float& deltaTime)
 
 	this->pPlayer.update(deltaTime);
 
-	this->mClouds.emplace_back(Weather(this->mCloudTextures, sf::Vector2f(1000.F, 100.F)));
+	if (this->pCloudSpawnTimer.isExpired())
+	{
+		this->mClouds.emplace_back(this->mCloudTextures, sf::Vector2f(0.F, 0.F));
+
+		this->pCloudSpawnTimer.restart(sf::seconds(2.F));
+	}
 
 	for (size_t i = 0; i < this->mClouds.size(); i++)
-		std::cout << "x position: " << this->mClouds[i].getCloudPosition().x << " y position: " << this->mClouds[i].getCloudPosition().y << "\n";
+		this->mClouds[i].updateClouds(deltaTime);
 
 	if (this->pLoadLevel == false)
 	{
