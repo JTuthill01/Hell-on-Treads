@@ -20,7 +20,18 @@ public:
 	void collision(const float& deltaTime);
 
 private:
-	void loadTrees();
+	float min;
+	float max;
+	float mYAxis;
+	float mHeight;
+
+	unsigned mTreeCount;
+
+	bool mIsTreeRemoved;
+
+	void bombExplosion(const float& deltaTime);
+	void treeRemoval();
+	void treeCollision(const float& deltaTime);
 	void loadEnemyPlane();
 	void removeEnemyProjectile();
 
@@ -30,8 +41,8 @@ private:
 	EnemySoldier mSoldier;
 	std::vector<EnemySoldier> mEnemySolider;
 
-	Plane mPlayerPlane;
-	Trees::Trees mTrees;
+	//Plane pPlayerPlane;
+	Trees::Tree mTrees;
 
 	thor::Timer mExplosionTimer;
 	thor::Timer mTextTagTimer;

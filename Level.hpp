@@ -1,6 +1,11 @@
 #pragma once
+#include <Resources/Tree.hpp>
+#include <Weather/Clouds.hpp>
+#include <Resources/Audio.hpp>
+#include <Weather/Weather.hpp>
 #include <Projectile/Projectile.hpp>
 #include <Resources/Particle.hpp>
+#include <Entity/Plane/Plane.hpp>
 #include <Entity/Player/Player.hpp>
 #include <Entity/Enemies/Enemy.hpp>
 #include <Collision/Collision.hpp>
@@ -20,6 +25,11 @@ public:
 	virtual void removeProjectile() = 0;
 
 protected:
+	void removeTrees(unsigned index);
+	void loadTrees();
+	void endGameInput();
+	void endGame();
+	void renderEndGame(sf::RenderTarget& target);
 	void removeEnemyPlane(unsigned index);
 	void playerProjectileCollision(const float& deltaTime);
 	void enemyProjectileCollision(const float& deltaTime);
@@ -28,6 +38,7 @@ protected:
 
 	std::stack<Level*>* pLevel;
 
+	sf::Event e;
 	sf::Texture pBackgroundTexture;
 	sf::Texture mExpolsionTexture;
 	sf::Sprite pBackgroundSprite;
@@ -36,16 +47,20 @@ protected:
 	sf::Font pFont;
 	std::vector<sf::Texture> pTextures;
 	std::vector<sf::Texture> pProjectileTextures;
+	std::vector<sf::Texture> pTreeTextures;
 
 	//Timers
 	thor::Timer pEnemySpawnTimer;
 	thor::Timer pTextTagTimer;
 	thor::Timer pCloudSpawnTimer;
 
+	Plane pPlayerPlane;
 	Player pPlayer;
 	std::vector<Player> player;
 
 	Enemy pEnemyTank;
+
+	std::vector<Trees::Tree> pTrees;
 	std::vector<Enemy> pEnemyJeep;
 	std::vector<Enemy> pEnemyTanks;
 	std::vector<Enemy> pEnemyPlane;
@@ -53,6 +68,9 @@ protected:
 	std::vector<Projectile> pProjectiles;
 	std::vector<TextTags> pTextTags;
 
+	Trees::Tree pTree; 
+	Audio pAudio;
+	Weather pWeather;
 	Entity pEntity;
 	Collision pCollision;
 	AuroraLoader::AuroraLoader mAurora;
@@ -60,13 +78,18 @@ protected:
 	static std::vector<sf::Texture> pParticleTextures;
 	std::vector<Particle::Particle> pParticle;
 
+	bool pShouldClose;
+	bool pIsTreeRemoved;
 	bool pIsEnemyProjectileRemoved;
-	bool pIsBombRemoved;
-	bool pIsRemoved;
+	bool pIsPlayerProjectileRemoved;
 	bool pLoadLevel;
 	bool pHasExploaded;
 
 private:
+	sf::Text mText;
+	sf::Text mResetText;
+	
+	thor::Timer mReset;
 	thor::Timer mExplosionTimer;
 	thor::Timer mParticleTimer;
 	void timer();
