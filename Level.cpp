@@ -8,17 +8,7 @@ Level::Level(sf::RenderWindow* window, std::stack<Level*>* level) : pWindow(wind
 	this->pFont.loadFromFile("Resources/Fonts/Anton-Regular.ttf");
 }
 
-Level::~Level()
-{
-	while (!this->pLevel->empty())
-	{
-		delete this->pLevel->top();
-
-		this->pLevel->pop();
-	}
-
-	delete this->pWindow;
-}
+Level::~Level() = default;
 
 void Level::removeTrees(unsigned index) { this->pTrees.erase(this->pTrees.begin() + index); }
 

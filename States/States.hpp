@@ -3,7 +3,7 @@ class States
 {
 public:
 	States(sf::RenderWindow* window, std::stack<States*>* states);
-	~States();
+	virtual ~States();
 
 	virtual void updateMousePositions();
 	virtual void update(const float& deltaTime) = 0;

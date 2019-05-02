@@ -8,7 +8,7 @@ class MainMenuState :
 {
 public:
 	MainMenuState(sf::RenderWindow* window, std::stack<States*>* states);
-	~MainMenuState();
+	virtual ~MainMenuState();
 
 	// Inherited via States
 	virtual void update(const float& deltaTime) override;

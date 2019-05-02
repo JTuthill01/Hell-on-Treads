@@ -21,6 +21,8 @@ Level_One::~Level_One()
 		delete this->pLevel->top();
 
 		this->pLevel->pop();
+
+		std::cout << "called" << "\n";
 	}
 }
 

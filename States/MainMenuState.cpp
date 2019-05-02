@@ -15,6 +15,13 @@ MainMenuState::~MainMenuState()
 
 	for (it = this->mButton.begin(); it != this->mButton.end(); ++it)
 		delete it->second;
+
+	while (!this->pStates->empty())
+	{
+		delete this->pStates->top();
+
+		this->pStates->pop();
+	}
 }
 
 void MainMenuState::update(const float& deltaTime)

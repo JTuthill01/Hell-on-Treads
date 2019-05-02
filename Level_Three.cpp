@@ -9,12 +9,12 @@ Level_Three::Level_Three(sf::RenderWindow* window, std::stack<Level*>* level) : 
 
 Level_Three::~Level_Three()
 {
-	while (!this->pLevel->empty())
+	/*while (!this->pLevel->empty())
 	{
 		delete this->pLevel->top();
 
 		this->pLevel->pop();
-	}
+	}*/
 }
 
 void Level_Three::update(const float& deltaTime)

@@ -13,6 +13,13 @@ GameState::~GameState()
 		delete this->mLevels.top();
 		this->mLevels.pop();
 	}
+
+	while (!this->pStates->empty())
+	{
+		this->pStates->pop();
+
+		delete this->pStates->top();
+	}
 }
 
 void GameState::update(const float& deltaTime)
