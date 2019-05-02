@@ -1,5 +1,6 @@
 #pragma once
 #include <Level/Level.hpp>
+#include <Level/Level_One.hpp>
 #include <Entity/Enemies/Enemy.hpp>
 #include <Entity/Enemies/Soldier/EnemySoldier.hpp>
 #include <Resources/TextTags.hpp>
@@ -17,7 +18,6 @@ public:
 	virtual void initLevel() override;
 
 	void input(const float& deltaTime);
-	void collision(const float& deltaTime);
 
 private:
 	float min;
@@ -29,9 +29,8 @@ private:
 
 	bool mIsTreeRemoved;
 
+	void pixelCollision(const float& deltaTime);
 	void bombExplosion(const float& deltaTime);
-	void treeRemoval();
-	void treeCollision(const float& deltaTime);
 	void loadEnemyPlane();
 	void removeEnemyProjectile();
 

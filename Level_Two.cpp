@@ -15,10 +15,7 @@ Level_Two::Level_Two(sf::RenderWindow* window, std::stack<Level*>* level) : Leve
 
 	this->pEnemySpawnTimer.restart(sf::seconds(0.2F));
 
-	this->loadTrees();
-
-	for (size_t i = 0; i < this->mTreeCount; i++)
-		this->pTrees.push_back(Trees::Tree(this->pTree.treeTextures, sf::Vector2f(thor::random(min, max), 310.F)));
+	//std::cout << level->size() << "\n";
 }
 
 Level_Two::~Level_Two()
@@ -39,7 +36,7 @@ void Level_Two::update(const float& deltaTime)
 	{
 		this->pEnemyPlane.push_back(Enemy(this->mEnemyPlaneTextures, Enemy::mEnemyProjectileTextures, sf::Vector2f(1700.F, (thor::random(min, mYAxis)) - 150), sf::Vector2f(-0.8F, 0.F), PLANE));
 
-		this->pEnemySpawnTimer.restart(sf::seconds(1.5F));
+		this->pEnemySpawnTimer.restart(sf::seconds(1.2F));
 	}
 
 	this->updateLevel(deltaTime);
@@ -50,13 +47,7 @@ void Level_Two::update(const float& deltaTime)
 
 	this->input(deltaTime);
 
-	this->collision(deltaTime);
-
-	this->treeCollision(deltaTime);
-
-	this->treeRemoval();
-
-	this->bombExplosion(deltaTime);
+	this->pixelCollision(deltaTime);
 
 	for (size_t i = 0; i < this->pEnemyPlane.size(); i++)
 		this->pEnemyPlane[i].updatePlane(deltaTime);
@@ -68,6 +59,8 @@ void Level_Two::update(const float& deltaTime)
 	this->removeProjectile();
 
 	this->removeEnemyProjectile();
+
+	this->endGameInput();
 }
 
 void Level_Two::render(sf::RenderTarget & target)
@@ -84,9 +77,6 @@ void Level_Two::render(sf::RenderTarget & target)
 	if (this->mTextTagTimer.isRunning())
 		for (size_t i = 0; i < this->mTextTags.size(); i++)
 			this->mTextTags[i]->render(target);
-
-	for (size_t i = 0; i < this->pTrees.size(); i++)
-		this->pTrees[i].render(target);
 
 	this->renderEndGame(target);
 }
@@ -114,16 +104,51 @@ void Level_Two::input(const float& deltaTime)
 		this->pPlayerPlane.move(0.F, 0.5F, deltaTime);
 }
 
-void Level_Two::collision(const float& deltaTime)
+void Level_Two::pixelCollision(const float& deltaTime)
 {
+	//Player Missile Collisions
 	for (int i = 0; i < this->pPlayerPlane.getProjectileSize(); i++)
-		if (this->pPlayerPlane.getProjectile(i).getBombPosition().y > this->pWindow->getSize().y)
-			this->pPlayerPlane.removeProjectile(i);
+	{
+		this->pPlayerPlane.getProjectile(i).update(deltaTime);
+
+		for (size_t j = 0; j < this->pEnemyPlane.size(); j++)
+		{
+			if (PixelCollision::BoundingBoxTest(this->pPlayerPlane.getProjectile(i).getProjectileSprite(), this->pEnemyPlane[j].getEnemyPlaneSprite()))
+			{
+				this->pPlayerPlane.setExplosionPosition(sf::Vector2f(this->pEnemyPlane[j].getEnemyPlanePosition().x - 350, this->pEnemyPlane[j].getEnemyPlanePosition().y - 200));
+
+				this->pPlayerPlane.setExplosion(true);
+
+				this->mExplosionTimer.restart(sf::seconds(0.3F));
+
+				int damage = this->pPlayerPlane.weaponDamage();
+
+				this->mTextTags.push_back(new TextTags(&this->mFont, " - " + std::to_string(damage), sf::Vector2f(this->pEnemyPlane[j].getEnemyPlanePosition().x + 150.F, this->pEnemyPlane[j].getEnemyPlanePosition().y
+					- 200.F), sf::Vector2f(1.F, 2.F), sf::Color::Green, 30U));
+
+				if (this->pEnemyPlane[j].getPlaneHp() > 0)
+				{
+					this->pEnemyPlane[j].planeTakeDamage(damage);
+
+					this->pIsPlayerProjectileRemoved = true;
+
+					std::cout << this->pEnemyPlane[j].getPlaneHp() << "\n";
+				}
+
+				if (this->pEnemyPlane[j].getPlaneHp() == 0)
+				{
+					this->removeEnemyPlane(j);
+
+					this->pIsPlayerProjectileRemoved = true;
+				}
+			}
+		}
+	}
 
 	//Player Enemy Collisions (Bomb)
 	for (int i = 0; i < this->pPlayerPlane.getProjectileSize(); i++)
 	{
-		if (this->pCollision.playerEnemyCollision(this->pPlayerPlane.getProjectile(i).getBombSprite(), this->mSoldier.getSoldierSprite(), deltaTime))
+		if (PixelCollision::BoundingBoxTest(this->pPlayerPlane.getProjectile(i).getBombSprite(), this->mSoldier.getSoldierSprite()))
 		{
 			this->pPlayerPlane.setExplosionPosition(sf::Vector2f(this->mSoldier.getPosition().x - 250, this->mSoldier.getPosition().y - 200));
 
@@ -149,7 +174,7 @@ void Level_Two::collision(const float& deltaTime)
 	{
 		for (size_t l = 0; l < this->pEnemyPlane.size(); l++)
 		{
-			if (this->pCollision.playerEnemyCollision(this->pPlayerPlane.getProjectile(k).getBombSprite(), this->pEnemyPlane[l].getEnemyPlaneSprite(), deltaTime))
+			if (PixelCollision::BoundingBoxTest(this->pPlayerPlane.getProjectile(k).getBombSprite(), this->pEnemyPlane[l].getEnemyPlaneSprite()))
 			{
 				this->pPlayerPlane.setExplosionPosition(sf::Vector2f(this->pEnemyPlane[l].getEnemyPlanePosition().x - 350, this->pEnemyPlane[l].getEnemyPlanePosition().y - 100));
 
@@ -178,48 +203,13 @@ void Level_Two::collision(const float& deltaTime)
 			}
 		}
 	}
-		
-		//Player Missile Collisions
-	for (int i = 0; i < this->pPlayerPlane.getProjectileSize(); i++)
-	{
-		this->pPlayerPlane.getProjectile(i).update(deltaTime);
-
-		for (size_t j = 0; j < this->pEnemyPlane.size(); j++)
-		{
-			if (this->pCollision.playerEnemyCollision(this->pPlayerPlane.getProjectile(i).getProjectileSprite(), this->pEnemyPlane[j].getEnemyPlaneSprite(), deltaTime))
-			{
-				this->pPlayerPlane.setExplosionPosition(sf::Vector2f(this->pEnemyPlane[j].getEnemyPlanePosition().x - 350, this->pEnemyPlane[j].getEnemyPlanePosition().y - 200));
-
-				this->pPlayerPlane.setExplosion(true);
-
-				this->mExplosionTimer.restart(sf::seconds(0.3F));
-
-				int damage = this->pPlayerPlane.weaponDamage();
-
-				this->mTextTags.push_back(new TextTags(&this->mFont, " - " + std::to_string(damage), sf::Vector2f(this->pEnemyPlane[j].getEnemyPlanePosition().x + 150.F, this->pEnemyPlane[j].getEnemyPlanePosition().y
-					- 200.F), sf::Vector2f(1.F, 2.F), sf::Color::Green, 30U));
-
-				if (this->pEnemyPlane[j].getPlaneHp() > 0)
-				{
-					this->pEnemyPlane[j].planeTakeDamage(damage);
-
-					if (this->pEnemyPlane[j].getPlaneHp() == 0)
-					{
-						this->removeEnemyPlane(j);
-
-						this->pIsPlayerProjectileRemoved = true;
-					}
-				}
-			}
-		}
-	}
 
 	//Enemy Missile Collisions
 	for (size_t i = 0; i < this->pEnemyPlane.size(); i++)
 	{
 		for (int j = 0; j < this->pEnemyPlane[i].getEnemyPlaneProjectileSize(); j++)
 		{
-			if (this->pCollision.playerEnemyCollision(this->pEnemyPlane[i].getEnemyPlaneProjectile(j).getMissileSprite(), this->pPlayerPlane.getPlaneSprite(), deltaTime))
+			if (PixelCollision::BoundingBoxTest(this->pEnemyPlane[i].getEnemyPlaneProjectile(j).getMissileSprite(), this->pPlayerPlane.getPlaneSprite()))
 			{
 				this->pPlayerPlane.setExplosionPosition(sf::Vector2f(this->pPlayerPlane.getPlanePosition().x - 450, this->pPlayerPlane.getPlanePosition().y - 200));
 
@@ -242,7 +232,8 @@ void Level_Two::collision(const float& deltaTime)
 
 					this->endGame();
 
-					this->endGameInput();
+					if (sf::Keyboard::isKeyPressed(sf::Keyboard::F1))
+						this->pLevel->push(new Level_One(pWindow, pLevel));
 				}
 			}
 		}
@@ -283,58 +274,6 @@ void Level_Two::bombExplosion(const float& deltaTime)
 	}
 }
 
-void Level_Two::treeRemoval()
-{
-	for (size_t i = 0; i < this->pTrees.size(); i++)
-	{
-		if (this->pIsTreeRemoved)
-		{
-			this->removeTrees(i);
-
-			this->pIsTreeRemoved = false;
-		}
-	}
-}
-
-void Level_Two::treeCollision(const float& deltaTime)
-{
-	//Player Missile
-	for (size_t i = 0; i < this->pTrees.size(); i++)
-	{
-		for (int k = 0; k < this->pPlayerPlane.getProjectileSize(); k++)
-		{
-			if (this->pCollision.playerEnemyCollision(this->pTrees[i].getTreeSprite(), this->pPlayerPlane.getProjectile(k).getProjectileSprite(), deltaTime))
-			{
-				this->pPlayerPlane.setExplosion(true);
-
-				this->pPlayerPlane.setExplosionPosition(sf::Vector2f(this->pTrees[i].getPosition().x, this->pTrees[i].getPosition().y));
-
-				int damage = this->pPlayerPlane.weaponDamage();
-
-				if (this->pTrees[i].getTreeHp() > 0)
-				{
-					this->pTrees[i].damaged(damage);
-
-					this->pIsPlayerProjectileRemoved = true;
-				}
-
-				if (this->pTrees[i].getTreeHp() == 0)
-				{
-					this->pAudio.loadSound("Resources/Sounds/Explosions/treeExplosion.ogg");
-
-					this->pAudio.setVolume(30.F);
-
-					this->pAudio.play();
-
-					this->pIsTreeRemoved = true;
-
-					this->pIsPlayerProjectileRemoved = true;
-				}
-			}
-		}
-	}
-}
-
 void Level_Two::loadEnemyPlane()
 {
 	sf::Texture temp;
@@ -363,6 +302,10 @@ void Level_Two::removeEnemyProjectile()
 
 void Level_Two::removeProjectile()
 {
+	for (int i = 0; i < this->pPlayerPlane.getProjectileSize(); i++)
+		if (this->pPlayerPlane.getProjectile(i).getBombPosition().y > this->pWindow->getSize().y)
+			this->pPlayerPlane.removeProjectile(i);
+
 	for (int i = 0; i < this->pPlayerPlane.getProjectileSize(); i++)
 	{
 		if (this->pIsPlayerProjectileRemoved)
