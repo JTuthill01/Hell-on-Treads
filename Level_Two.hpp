@@ -1,6 +1,7 @@
 #pragma once
 #include <Level/Level.hpp>
 #include <Level/Level_One.hpp>
+#include <Level/Level_Three.hpp>
 #include <Entity/Enemies/Enemy.hpp>
 #include <Entity/Enemies/Soldier/EnemySoldier.hpp>
 #include <Resources/TextTags.hpp>
@@ -10,7 +11,7 @@ class Level_Two :
 {
 public:
 	Level_Two(sf::RenderWindow* window, std::stack<Level*>* level);
-	virtual ~Level_Two();
+	~Level_Two();
 
 	// Inherited via Level
 	virtual void update(const float& deltaTime) override;
@@ -29,6 +30,7 @@ private:
 
 	bool mIsTreeRemoved;
 
+	void setGround();
 	void pixelCollision(const float& deltaTime);
 	void bombExplosion(const float& deltaTime);
 	void loadEnemyPlane();

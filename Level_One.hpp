@@ -1,7 +1,6 @@
 #pragma once
 #include <Entity/Player/Player.hpp>
 #include <Entity/Enemies/Enemy.hpp>
-#include <Weather/Weather.hpp>
 #include "Level.hpp"
 #include "Level_Two.hpp"
 
@@ -10,7 +9,7 @@ class Level_One :
 {
 public:
 	Level_One(sf::RenderWindow* window, std::stack<Level*>* level);
-	virtual ~Level_One();
+	 ~Level_One();
 
 	// Inherited via Level
 	virtual void update(const float& deltaTime) override;
@@ -18,9 +17,12 @@ public:
 	virtual void initLevel() override;
 
 private:
+	void removeClouds(unsigned index);
 	void loadClouds();
 	void loadTank();
 	void playerInput(const float& deltaTime);
+	void playerEnemyCollision(const float& deltaTime);
+	void enemyPlayerCollision(const float& deltaTime);
 
 	sf::Texture mLevelOneTexture;
 	sf::Sprite mLevelOneSprite;
@@ -29,11 +31,10 @@ private:
 	std::vector<sf::Texture> mEnemyTankProjectiles;
 	std::vector<Enemy> mEnemyTank;
 
-	Weather mRain;
-	Enemy enemies;
-
 	std::vector<sf::Texture> mCloudTextures;
-	std::vector<Weather> mClouds;
+	std::vector<Clouds> mClouds;
+
+	Enemy enemies;
 
 	// Inherited via Level
 	virtual void removeProjectile() override;

@@ -1,4 +1,5 @@
 #pragma once
+#include <Collision/PixelCollision.hpp>
 #include <Resources/Tree.hpp>
 #include <Weather/Clouds.hpp>
 #include <Resources/Audio.hpp>
@@ -17,7 +18,7 @@ class Level
 {
 public:
 	Level(sf::RenderWindow* window, std::stack<Level*>* level);
-	~Level();
+	virtual ~Level();
 
 	virtual void update(const float& deltaTime) = 0;
 	virtual void render(sf::RenderTarget& target) = 0;
@@ -31,16 +32,16 @@ protected:
 	void endGame();
 	void renderEndGame(sf::RenderTarget& target);
 	void removeEnemyPlane(unsigned index);
-	void playerProjectileCollision(const float& deltaTime);
-	void enemyProjectileCollision(const float& deltaTime);
 	void updateLevel(const float& deltaTime);
 	void setExplosions(sf::Vector2f position, sf::Vector2f scale);
 
 	std::stack<Level*>* pLevel;
 
 	sf::Event e;
+	sf::Texture pGroundTexture;
 	sf::Texture pBackgroundTexture;
 	sf::Texture mExpolsionTexture;
+	sf::Sprite pGroundSprite;
 	sf::Sprite pBackgroundSprite;
 	sf::Sprite mExpolsionSprite;
 	sf::RenderWindow* pWindow;
@@ -85,12 +86,14 @@ protected:
 	bool pLoadLevel;
 	bool pHasExploaded;
 
+	thor::Timer mExplosionTimer;
+	thor::Timer mParticleTimer;
+	void timer();
+
 private:
 	sf::Text mText;
 	sf::Text mResetText;
 	
 	thor::Timer mReset;
-	thor::Timer mExplosionTimer;
-	thor::Timer mParticleTimer;
-	void timer();
+	
 };

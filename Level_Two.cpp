@@ -15,6 +15,8 @@ Level_Two::Level_Two(sf::RenderWindow* window, std::stack<Level*>* level) : Leve
 
 	this->pEnemySpawnTimer.restart(sf::seconds(0.2F));
 
+	this->setGround();
+
 	//std::cout << level->size() << "\n";
 }
 
@@ -37,6 +39,16 @@ void Level_Two::update(const float& deltaTime)
 		this->pEnemyPlane.push_back(Enemy(this->mEnemyPlaneTextures, Enemy::mEnemyProjectileTextures, sf::Vector2f(1700.F, (thor::random(min, mYAxis)) - 150), sf::Vector2f(-0.8F, 0.F), PLANE));
 
 		this->pEnemySpawnTimer.restart(sf::seconds(1.2F));
+	}
+
+	if (this->pLoadLevel == false)
+	{
+		if (this->pPlayer.getPosition().x > this->pWindow->getSize().x)
+		{
+			this->pLevel->emplace(new Level_Three(this->pWindow, this->pLevel));
+
+			this->pLoadLevel = true;
+		}
 	}
 
 	this->updateLevel(deltaTime);
@@ -66,6 +78,8 @@ void Level_Two::update(const float& deltaTime)
 void Level_Two::render(sf::RenderTarget & target)
 {
 	target.draw(this->pBackgroundSprite);
+
+	target.draw(this->pGroundSprite);
 
 	this->pPlayerPlane.render(target);
 
@@ -104,6 +118,15 @@ void Level_Two::input(const float& deltaTime)
 		this->pPlayerPlane.move(0.F, 0.5F, deltaTime);
 }
 
+void Level_Two::setGround()
+{
+	if (!this->pGroundTexture.loadFromFile("Resources/Textures/Backgrounds/road.png"))
+		std::cerr << "Ground didn't load" << "\n";
+
+	this->pGroundSprite.setTexture(this->pGroundTexture);
+	this->pGroundSprite.setPosition(sf::Vector2f(0.F, 0.F));
+}
+
 void Level_Two::pixelCollision(const float& deltaTime)
 {
 	//Player Missile Collisions
@@ -132,7 +155,7 @@ void Level_Two::pixelCollision(const float& deltaTime)
 
 					this->pIsPlayerProjectileRemoved = true;
 
-					std::cout << this->pEnemyPlane[j].getPlaneHp() << "\n";
+					//std::cout << this->pEnemyPlane[j].getPlaneHp() << "\n";
 				}
 
 				if (this->pEnemyPlane[j].getPlaneHp() == 0)
